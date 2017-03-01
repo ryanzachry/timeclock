@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Employee Status</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link href="/libs/normalize.css" rel="stylesheet">
+        <script src="/libs/jquery-1.10.2.js" type="text/javascript" ></script>
+        <script src="/libs/jquery.color-2.1.2.min.js" type="text/javascript" ></script>
+        <link href="/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <script src="/libs/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+
+        <style type="text/css">
+            body {                
+                padding: 20px;
+                background-color: #333333;
+            }
+            .emp {
+                margin: 5px;
+                margin-left: 10px;
+                margin-right: 10px;
+                font-weight: <%= $weight %>;
+                font-size: <%= $font %>em;
+                width:100%; 
+                text-align:left; 
+                padding-left:10px; 
+                
+                margin-bottom:5px;
+            }
+            #t {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+
+    </head>
+    <body class="center-block">
+    <br>
+    <div class="form-group center-block">
+        <table id="t"></table>
+    </div>
+
+
+<script type="text/javascript">
+    var loc = "?loc=" + "<%= param("loc") %>";
+    var namesMD5, statusMD5;
+
+    $(function() {
+        $.ajaxSetup({ cache: false });      
+        checkEmployees();
+        setInterval('checkEmployees()', 1000);
+    });
+
+
+    //
+    // Change for changes to the employee list or status and update when needed
+    //
+    function checkEmployees() {
+        $.getJSON("/status/employees.json" + loc + "&_=" + (new Date()).getTime(), function(res) {
+            if (res.namesMD5 != namesMD5) {
+                namesMD5 = res.namesMD5;
+                redrawEmployeeList(res.employees, <%= $cols %>);
+            }
+            else if (res.statusMD5 != statusMD5) {
+                statusMD5 = res.statusMD5;
+                updateEmployeeStatus(res.employees);
+            }
+        });
+    }
+
+
+    //
+    // Clears the page and redraws all the employee name plates with 
+    // their current status. This should be called often, only on initial
+    // page load and whenever a new employee is added to the location.
+    //
+    function redrawEmployeeList(employees, cols) {
+        var splitAt = Math.ceil(employees.length / cols)
+        var html = new Array();
+        for (var r = 0; r < splitAt; r++) {
+            html.push("<tr>");
+            for (var c = 0; c < cols; c++) {
+                var index = (c * splitAt) + r;
+                var e = employees[index];
+                if (e) {
+                    html.push("<td>");
+                    html.push('<button type="button" class="btn pull-left btn-black btn-default emp" id="emp' + e.employee_id + '" status="0">' + e.name + '</button><br>');
+                    html.push("</td>");
+                }
+            }
+            html.push("</tr>");
+        }
+
+        $("#t").html(html.join(""));
+
+        var buttonWidth = ($(document).width() / cols) - (cols * 8);
+        $(".emp").css("width", buttonWidth + "px");
+
+        $.each(employees, function(i, e) {
+            if (e.status == 1) {
+                $("#emp" + e.employee_id).addClass("btn-primary");
+                $("#emp" + e.employee_id).attr("status", "1");                    
+            }
+        });
+    }
+
+
+    //
+    // Do a little flash to indicate that an employee is punching in / out
+    //
+    function updateEmployeeStatus(employees) {      
+        $.each(employees, function(i, e) {
+            var plate = $("#emp" + e.employee_id);              
+            if (plate.attr("status") == e.status) return;
+            plate.attr("status", e.status);
+
+            if (e.status == 1) {
+                // -> green -> pause -> blue
+                plate.stop().animate({
+                    backgroundColor: '#5CB85C',
+                    borderColor:     '#4CAE4C',
+                    color:           '#FFFFFF'
+                }, 400).animate({
+                    backgroundColor: '#5CB85C',
+                    borderColor:     '#4CAE4C'
+                }, 2000).animate({              
+                    backgroundColor: '#428BCA',
+                    borderColor:     '#357EBD',
+                }, 3000);
+            }
+            else {
+                // -> green -> pause -> white
+                plate.stop().animate({
+                    backgroundColor: '#5CB85C',
+                    borderColor:     '#4CAE4C',
+                }, 400).animate({
+                    backgroundColor: '#5CB85C',
+                    borderColor:     '#4CAE4C'
+                }, 2000).animate({              
+                    backgroundColor: '#FFFFFF',
+                    borderColor:     '#CCCCCC',
+                    color:           '#333333'
+                }, 3000);
+            }
+        });
+    }
+
+
+</script>
+
+    </body>
+</html>

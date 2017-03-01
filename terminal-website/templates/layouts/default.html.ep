@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>TC Terminal</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <style type="text/css">
+            html,
+            body {
+                 color: #4A4A4A;
+                 height: 100%;
+            }
+			.punchTimes {
+				font-size: 1.5em;
+			}
+			.punchDates {
+				font-size: 2.4em;
+				font-weight: bold;
+			}
+            .banner {
+                font-size:4em; 
+                width:100%; 
+                border-radius:0; 
+                padding:25px 0 0 0;
+            }
+            #clock {
+                /*padding-top: 0px;*/
+                padding:0;
+                padding-top: 40px;
+                padding-left: 10px;
+                padding-bottom: 20px;
+                font-size: 15em;
+                line-height: 1.1;
+                width: 100%;
+            }
+            #day {
+                /*float: right;*/
+                /*padding-left: 30px;*/
+                font-size: 1em;
+            }
+            #calendar {
+                /*padding-top:250px;*/
+                padding: 0;
+                padding-right: 10px;
+                font-size: 1em;
+            }
+
+            #wrap {
+                min-height: 100%;
+                height: auto;
+                margin: 0 auto -125px;
+                padding: 0 0 60px;
+            }
+            
+            #footer {
+                height: 75px;
+                background-color: #f5f5f5;
+                padding: 10px 50px 0px 50px;
+            }
+
+            /* colored block quote looking things from the bootstrap docs */
+            .bs-callout {
+                margin: 20px 0;
+                padding: 15px 30px 15px 15px;
+                border-left: 5px solid #eee;
+            }
+            .bs-callout h4 {
+                margin-top: 0;
+            }
+            .bs-callout p:last-child {
+                margin-bottom: 0;
+            }
+            .bs-callout code,
+            .bs-callout .highlight {
+                background-color: #fff;
+            }
+            .bs-callout-danger {
+                background-color: #fcf2f2;
+                border-color: #dFb5b4;
+            }
+            .bs-callout-warning {
+                background-color: #fefbed;
+                border-color: #f1e7bc;
+            }
+            .bs-callout-info {
+                background-color: #f0f7fd;
+                border-color: #d0e3f0;
+            }
+
+        </style>
+
+
+        <script type="text/javascript" src="/libs/jquery-1.9.1.min.js"></script>
+        <link href="/libs/calendar/bootstrap.calendar.css" rel="stylesheet">
+        <script type="text/javascript" src="/libs/calendar/bootstrap.calendar.js"></script>
+
+        <!-- little watchdog for android -->
+        <script type="text/javascript">
+            function watchdog() { try { android.checkIn(); } catch (e) { } }
+            $(function() {
+                watchdog();
+                setInterval('watchdog()', 1000);
+            });
+        </script>
+
+    </head>
+    <body>
+        <%= content %>
+    </body>
+</html>

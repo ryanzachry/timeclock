@@ -1,0 +1,68 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+	    <h1>
+	    	Tardies for the Current Fiscal Year
+	    	<span class="text-muted" style="font-size:.7em;"></span>
+	    </h1>
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12">
+        % for my $empID (sort { $list->{$a}->{name} cmp $list->{$b}->{name} } keys %$list) {
+            % my $numTardies = $list->{$empID}->{numTardies};
+            <h3>
+                <a href="/employee/<%= $empID %>"><%= $list->{$empID}->{name} %></a>
+                <span class="text-muted" style="font-size:.7em;">
+                    % if ($numTardies == 1) {
+                        (1 tardy)
+                    % } else {
+                        (<%= $numTardies %> tardies)
+                    % }
+                </span>
+            </h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reason (if removed)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                % for my $p (@{ $list->{$empID}->{tardies} }) {
+                    <tr>
+                        % if ($p->{deleted}) {
+                            <td><s><%= $p->{punch_time} %></s></td>
+                        % } else {
+                            <td><a href="/employee/<%= $empID %>/punchDetails/<%= $p->{punch_id} %>"><%= $p->{punch_time} %></a></td>
+                        % }
+
+                        <td><%= $p->{reason_desc} %></td>
+                    </tr>
+                % }
+                </tbody>
+            </table>
+
+            <br><br>
+
+
+        % }
+
+
+        </div>
+    </div>
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+    });
+</script>

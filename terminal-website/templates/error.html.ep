@@ -1,0 +1,25 @@
+% layout 'default';
+
+
+<div id="wrap">
+	<br><br>
+	<button type="button" class="btn btn-danger btn-large" style="font-size:4em; width:100%; border-radius:0; padding:0;">
+		<%= flash("error") %>
+	</button>
+</div> 
+
+%= include 'badgeReader'
+
+<script type="text/javascript">
+	var timeout;
+
+	$(function() {
+		$.ajaxSetup({ cache: false });
+
+		timeout = setTimeout(function() {
+			document.location.href = "/main?_=" + (new Date()).getTime();
+		}, 3000);
+
+        $(window).keydown(function() { clearInterval(timeout); });
+	});
+</script>

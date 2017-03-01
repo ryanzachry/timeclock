@@ -1,0 +1,105 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Employee Accounts
+            <span class="text-muted" style="font-size:.7em;"></span>
+            <a href="/admin/employees/new" class="pull-right btn btn-primary">New Employee</a>
+        </h1>
+    </div>
+
+    <table id="mainTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th> 
+                <th>Name</th>
+                <th>Badge</th>
+                <th>Flex Week</th>
+                <th>Location</th>
+                <th>Domain Account</th>
+                <th>Hire Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        % for my $empID (accountEmployees()) {
+            % my $e = employeeDetails($empID);
+            % my $name = "$e->{first_name} $e->{last_name}";
+            % $e->{badge} =~ s/(....)(?!$)/$1-/g;
+
+            <tr>
+                <td class="text-left"><%= $e->{as400_id} %></td>
+                <td><a href="/admin/employees/edit/<%= $empID %>"><%= $name %></a></td>
+                <td><span style="font-family:monospace;"><%= uc($e->{badge}) %></span></td>
+
+                % if ($e->{flex} == 1) {
+                    <td><%= $e->{flex_week} %></td>
+                % } else {
+                    <td>-</td>
+                % }
+
+                <td><%= $e->{location} %></td>
+                <td><%= $e->{ad_name} %></td>
+                <td><%= $e->{hire_date} %></td>
+            </tr>
+
+        % }
+        </tbody>
+    </table>
+
+
+    <br><br>
+    <h3>Disabled Employees</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        % for my $emp (@$disabled) {
+            <tr>
+                <td><%= $emp->{as400_id} %></td>
+                <td><%= $emp->{first_name} . " " . $emp->{last_name} %></td>
+                <td><a href="/admin/restoreEmployee/<%= $emp->{employee_id} %>">Restore Employee</a></td>
+            </tr>
+        % }
+        </tbody>
+    </table>
+
+
+
+
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+        $("#mainTable").dataTable({
+            bPaginate: false,
+            bFilter: false,
+            aaSorting: [[1, "asc"]],
+            aoColumns: [
+                {sType:"num"},
+                null,
+                null,
+                null,
+                null,
+                null,
+				null,
+            ],
+        });
+
+
+
+    });
+</script>

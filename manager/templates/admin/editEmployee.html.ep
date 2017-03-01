@@ -1,0 +1,248 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    % my $e = employeeDetails(param("id"));
+
+    <div class="page-header">    
+        <h1>
+            Employee Account - <%= $e->{first_name} . " " . $e->{last_name} %>
+            <span class="text-muted" style="font-size:.7em;"></span>
+            <a href="/admin/employees/delete/<%= param("id") %>" class="pull-right btn btn-danger">Delete Employee</a>
+        </h1>
+    </div>
+
+
+
+    <form method="post" action="/admin/employees/save" class="form-horizontal">
+        <input type="hidden" name="employee_id" value="<%= $e->{employee_id} %>">
+
+        <div class="form-group">
+            <label for="first_name" class="col-xs-2 control-label">First Name</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="first_name" name="first_name" value="<%= $e->{first_name} %>">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="last_name" class="col-xs-2 control-label">Last Name</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="last_name" name="last_name" value="<%= $e->{last_name} %>">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="as400_id" class="col-xs-2 control-label">ID Number</label>
+            <div class="col-xs-2">
+                <input type="text" class="form-control" id="as400_id" name="as400_id" value="<%= $e->{as400_id} %>">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="badge" class="col-xs-2 control-label">iButton Number</label>
+            <div class="col-xs-3">
+                <input type="text" class="form-control" id="badge" name="badge" value="<%= uc($e->{badge}) %>">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="location_id" class="col-xs-2 control-label">Location</label>
+            <div class="col-xs-4">
+                <select class="form-control" name="location_id" id="location_id">
+                    % for (@$locations) {
+                        <option value="<%= $_->{id} %>"><%= $_->{loc_desc} %></option>
+                    % }
+                </select>
+            </div>
+        </div> <!-- /form-group -->
+
+        <div class="form-group">
+            <label for="shift" class="col-xs-2 control-label">Shift</label>
+            <div class="col-xs-6" style="padding-top: 7px;">
+                <input type="radio" name="shift" value="1" checked>1st &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="shift" value="2">2nd
+            </div>
+        </div> <!-- /form-group -->
+
+<!--
+        <div class="form-group form-inline">
+            <label for="start_time" class="col-xs-2 control-label">Start Time</label>
+            <div class="col-xs-6">
+                <input type="text" name="start_time" id="start_time" class="form-control" style="width:80px;" value="<%= $e->{start_time} %>"> &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="start_ampm" value="AM">AM &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="start_ampm" value="PM">PM
+            </div>
+        </div>
+-->
+
+        <div class="form-group">
+            <label for="temp" class="col-xs-2 control-label">Temp</label>
+            <div class="col-xs-6">
+                <input type="radio" name="temp" value="0" checked>No &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="temp" value="1">Yes
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="badge" class="col-xs-2 control-label">Flextime</label>
+            <div class="col-xs-6">                
+                <input type="radio" name="flex" value="0">No &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flex" value="A">A &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flex" value="B">B
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ad_name" class="col-xs-2 control-label">Domain Account</label>
+            <div class="col-xs-3">
+                <input type="text" name="ad_name" id="ad_name" class="form-control" value="<%= $e->{ad_name} %>">
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="hire_date" class="col-xs-2 control-label">Hire Date</label>
+            <div class="col-xs-2">
+                <input type="text" name="hire_date" id="hire_date" class="form-control" value="<%= $e->{hire_date} %>">
+            </div>
+            <div class="col-xs-2">
+                <span>YYYY-MM-DD</span>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="" class="col-xs-2 control-label"><br><br>Start Times</label>
+            <div class="col-xs-9">
+
+<table class="table">
+    <thead>
+        <tr>
+            <th><input type="checkbox" class="stEnable" name="stMonEnable" id="stMonEnable" day="Mon"> Mon</th>
+            <th><input type="checkbox" class="stEnable" name="stTueEnable" id="stTueEnable" day="Tue"> Tue</th>
+            <th><input type="checkbox" class="stEnable" name="stWedEnable" id="stWedEnable" day="Wed"> Wed</th>
+            <th><input type="checkbox" class="stEnable" name="stThuEnable" id="stThuEnable" day="Thu"> Thu</th>
+            <th><input type="checkbox" class="stEnable" name="stFriEnable" id="stFriEnable" day="Fri"> Fri</th>
+            <th><input type="checkbox" class="stEnable" name="stSatEnable" id="stSatEnable" day="Sat"> Sat</th>
+            <th><input type="checkbox" class="stEnable" name="stSunEnable" id="stSunEnable" day="Sun"> Sun</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <input type="text" class="form-control" name="stMon" id="stMon" style="width:60px; padding:2px;" value="<%= $e->{start_mon} %>">
+                <input type="radio" class="stAMPM" name="stMonAMPM" id="stMonAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stMonAMPM" id="stMonAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stTue" id="stTue" style="width:60px; padding:2px;" value="<%= $e->{start_tue} %>">
+                <input type="radio" class="stAMPM" name="stTueAMPM" id="stTueAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stTueAMPM" id="stTueAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stWed" id="stWed" style="width:60px; padding:2px;" value="<%= $e->{start_wed} %>">
+                <input type="radio" class="stAMPM" name="stWedAMPM" id="stWedAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stWedAMPM" id="stWedAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stThu" id="stThu" style="width:60px; padding:2px;" value="<%= $e->{start_thu} %>">
+                <input type="radio" class="stAMPM" name="stThuAMPM" id="stThuAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stThuAMPM" id="stThuAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stFri" id="stFri" style="width:60px; padding:2px;" value="<%= $e->{start_fri} %>">
+                <input type="radio" class="stAMPM" name="stFriAMPM" id="stFriAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stFriAMPM" id="stFriAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stSat" id="stSat" style="width:60px; padding:2px;" value="<%= $e->{start_sat} %>">
+                <input type="radio" class="stAMPM" name="stSatAMPM" id="stSatAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stSatAMPM" id="stSatAMPM" value="PM">PM
+            </td>
+            <td>
+                <input type="text" class="form-control" name="stSun" id="stSun" style="width:60px; padding:2px;" value="<%= $e->{start_sun} %>">
+                <input type="radio" class="stAMPM" name="stSunAMPM" id="stSunAMPM" value="AM">AM<br>
+                <input type="radio" class="stAMPM" name="stSunAMPM" id="stSunAMPM" value="PM">PM
+            </td>
+
+        </tr>
+    </tbody>
+</table>
+
+
+            </div>
+        </div>
+
+        <br><br>
+        <div class="col-xs-8">
+            <a href="/admin/employees" class="btn btn-default">Cancel</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button type="submit" class="btn btn-primary">Save Changes</button>            
+        </div>
+
+    </form>
+
+
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+        $("#location_id option[value='<%= $e->{location_id} %>']").prop('selected', 'selected');
+        $("#shift").val(<%= $e->{night_shift} %>);
+        $("input[name='temp'][value='<%= $e->{temp} %>']:radio").prop('checked', 'checked');
+        $("input[name='shift'][value='<%= $e->{shift} %>']:radio").prop('checked', 'checked');
+        if (<%= $e->{flex} %> == 0) {
+            $("input[name='flex'][value='0']:radio").prop('checked', 'checked');
+        } else {
+            $("input[name='flex'][value='<%= $e->{flex_week} %>']:radio").prop('checked', 'checked');
+        }
+
+        var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        $(".stEnable").click(function() {
+            var day = $(this).attr('day');
+            if ($(this).is(":checked")) {
+                $("#st" + day).removeAttr("disabled");
+                $("#st" + day).focus();
+            } else {
+                $("#st" + day).attr("disabled", "disabled");
+            }
+        });
+
+        $.each(days, function(num, day) {
+            $("#st" + day).attr("disabled", "disabled");
+            if ($("#st" + day).val() != "") {
+                $("#st" + day + "Enable").click();
+            }
+        });
+
+        $(".stAMPM[value='AM']").prop('checked', 'checked');
+        $("input[name='stMonAMPM'][value='<%= $e->{start_mon_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stTueAMPM'][value='<%= $e->{start_tue_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stWedAMPM'][value='<%= $e->{start_wed_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stThuAMPM'][value='<%= $e->{start_thu_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stFriAMPM'][value='<%= $e->{start_fri_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stSatAMPM'][value='<%= $e->{start_sat_ampm} %>']:radio").prop('checked', 'checked');
+        $("input[name='stSunAMPM'][value='<%= $e->{start_sun_ampm} %>']:radio").prop('checked', 'checked');
+        
+        $("#first_name").focus();
+
+        // to catch enter from button reader
+        $(window).keydown(handleKeyDown);
+
+    });
+
+    function handleKeyDown(e) {
+        // The reader sends enter at the end of the serial
+        if (e.keyCode == 13) {
+            e.preventDefault();
+        }
+    }
+</script>

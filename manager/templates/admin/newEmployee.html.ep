@@ -1,0 +1,191 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            New Employee
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+
+
+    <form method="post" action="/admin/employees/add" class="form-horizontal">
+        <input type="hidden" name="employee_id">
+
+        <div class="form-group">
+            <label for="first_name" class="col-xs-2 control-label">First Name</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="first_name" name="first_name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="last_name" class="col-xs-2 control-label">Last Name</label>
+            <div class="col-xs-4">
+                <input type="text" class="form-control" id="last_name" name="last_name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="as400_id" class="col-xs-2 control-label">ID Number</label>
+            <div class="col-xs-2">
+                <input type="text" class="form-control" id="as400_id" name="as400_id">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="badge" class="col-xs-2 control-label">iButton Number</label>
+            <div class="col-xs-3">
+                <input type="text" class="form-control" id="badge" name="badge">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="location_id" class="col-xs-2 control-label">Location</label>
+            <div class="col-xs-4">
+                <select class="form-control" name="location_id" id="location_id">
+                    % for (@$locations) {
+                        <option value="<%= $_->{id} %>"><%= $_->{loc_desc} %></option>
+                    % }
+                </select>
+            </div>
+        </div> <!-- /form-group -->
+
+        <div class="form-group">
+            <label for="shift" class="col-xs-2 control-label">Shift</label>
+            <div class="col-xs-6" style="padding-top: 7px;">
+                <input type="radio" name="shift" value="1" checked>1st &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="shift" value="2">2nd
+            </div>
+        </div> <!-- /form-group -->
+
+        <div class="form-group">
+            <label for="temp" class="col-xs-2 control-label">Temp</label>
+            <div class="col-xs-6">
+                <input type="radio" name="temp" value="0" checked>No &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="temp" value="1">Yes
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="badge" class="col-xs-2 control-label">Flextime</label>
+            <div class="col-xs-6">                
+                <input type="radio" name="flex" value="0">No &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flex" value="A">A &nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flex" value="B">B
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ad_name" class="col-xs-2 control-label">Domain Account</label>
+            <div class="col-xs-3">
+                <input type="text" name="ad_name" id="ad_name" class="form-control">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="" class="col-xs-2 control-label">Start Times</label>
+            <div class="col-xs-9">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="stEnable" name="stMonEnable" id="stMonEnable" day="Mon"> Mon</th>
+                            <th><input type="checkbox" class="stEnable" name="stTueEnable" id="stTueEnable" day="Tue"> Tue</th>
+                            <th><input type="checkbox" class="stEnable" name="stWedEnable" id="stWedEnable" day="Wed"> Wed</th>
+                            <th><input type="checkbox" class="stEnable" name="stThuEnable" id="stThuEnable" day="Thu"> Thu</th>
+                            <th><input type="checkbox" class="stEnable" name="stFriEnable" id="stFriEnable" day="Fri"> Fri</th>
+                            <th><input type="checkbox" class="stEnable" name="stSatEnable" id="stSatEnable" day="Sat"> Sat</th>
+                            <th><input type="checkbox" class="stEnable" name="stSunEnable" id="stSunEnable" day="Sun"> Sun</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control" name="stMon" id="stMon" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stMonAMPM" id="stMonAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stMonAMPM" id="stMonAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stTue" id="stTue" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stTueAMPM" id="stTueAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stTueAMPM" id="stTueAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stWed" id="stWed" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stWedAMPM" id="stWedAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stWedAMPM" id="stWedAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stThu" id="stThu" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stThuAMPM" id="stThuAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stThuAMPM" id="stThuAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stFri" id="stFri" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stFriAMPM" id="stFriAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stFriAMPM" id="stFriAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stSat" id="stSat" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stSatAMPM" id="stSatAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stSatAMPM" id="stSatAMPM" value="PM">PM
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="stSun" id="stSun" style="width:60px; padding:2px;">
+                                <input type="radio" class="stAMPM" name="stSunAMPM" id="stSunAMPM" value="AM">AM<br>
+                                <input type="radio" class="stAMPM" name="stSunAMPM" id="stSunAMPM" value="PM">PM
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>            
+        </div>
+
+        <br><br>
+        <div class="col-xs-8">
+            <a href="/admin/employees" class="btn btn-default">Cancel</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+
+    </form>
+
+
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+        var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        
+        $(".stEnable").click(function() {
+            var day = $(this).attr('day');
+            if ($(this).is(":checked")) {
+                $("#st" + day).removeAttr("disabled");
+                $("#st" + day).focus();
+            } else {
+                $("#st" + day).attr("disabled", "disabled");
+            }
+        });
+
+        $.each(days, function(num, day) {
+            $("#st" + day).attr("disabled", "disabled");
+            if ($("#st" + day).val() != "") {
+                $("#st" + day + "Enable").click();
+            }
+        });
+
+        $(".stAMPM[value='AM']").prop('checked', 'checked');
+        
+        $("#first_name").focus();
+
+    });
+</script>

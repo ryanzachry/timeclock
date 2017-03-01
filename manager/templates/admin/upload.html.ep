@@ -1,0 +1,67 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Upload To AS400
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="bs-callout bs-callout-info">
+        <p>
+            <ul>
+                <li>Pay cycle is the paycheck number for the month.</li>
+                <li>Payroll quarter is the calendar month.</li>
+            </ul>
+        </p>
+    </div>
+    
+    <br>
+
+    <form method="post" action="/admin/upload" class="form-horizontal">
+
+        <div class="form-group">
+            <label for="payCycle" class="col-xs-2 control-label">Pay Cycle</label>
+            <div class="col-xs-1">
+                <input type="text" class="form-control" id="payCycle" name="payCycle" value="<%= $payCycle %>">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="payQuarter" class="col-xs-2 control-label">Payroll Quarter</label>
+            <div class="col-xs-1">
+                <input type="text" class="form-control" id="payQuarter" name="payQuarter" value="<%= $payQuarter %>">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-xs-2"></div>
+            <div class="col-xs-4">
+                <button type="submit" class="btn btn-primary">Send to AS400</button>
+            </div>
+        </div>
+    </form>
+
+
+    % if (flash("sent")) {
+    <div class="bs-callout bs-callout-warning">
+        <p>
+            <b><%= flash("sent") %></b>
+        </p>
+    </div>
+    % }
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+        $("#payCycle").focus();
+    });
+</script>

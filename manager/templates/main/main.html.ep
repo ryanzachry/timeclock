@@ -1,0 +1,259 @@
+% layout 'default';
+
+
+
+<div class="container">
+
+    %= include 'header'
+
+
+    <div class="page-header">    
+        <h1>
+            Employee Summary
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 clickableColChart" id="chartEmployeeList">
+        </div>
+    </div>
+
+    <table id="mainTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-right"><input type="checkbox" id="checkAll"></th>
+                <th>ID</th> 
+                <th>Name</th>
+                <th class="text-right">Total Time</th>
+                <th class="text-right">Regular</th>
+                <th class="text-right">Overtime</th>
+                <th class="text-right">Vacation</th>
+                <th class="text-right">Sick</th>
+                <th class="text-right">Holiday</th>
+                <th class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        % for my $empID (accountEmployees()) {
+            % my $e = employeeDetails($empID);
+            % my $t = calcEmployeeTime($empID, session("period"));
+            % my $name = "$e->{first_name} $e->{last_name}";
+
+            <tr>
+                <td class="text-center"><input type="checkbox" id="<%= $e->{employee_id} %>" class="empSel"></td>
+                <td class="text-left"><%= $e->{as400_id} %></td>
+                <td><a href="/employee/<%= $empID %>"><%= $name %></a></td>
+                <td class="text-right"><%== prettyTime($t->{total}    / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{regular}  / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{over}     / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{vacation} / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{sick}     / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{holiday}  / 60) %></td>
+
+                % if ($e->{status}) {
+                    <td class="text-center" id="punch">
+                        <a href="/main/<%= $empID %>/punch">
+                            <span class="label label-info pull-right" data-toggle="tooltip" data-placement="left" title="Click to punch out">&nbsp;&nbsp;In&nbsp;&nbsp;</span>
+                        </a>
+                    </td>
+                % } else {
+                    <td class="text-center" id="punch">
+                        <a href="/main/<%= $empID %>/punch">
+                            <span class="label label-default pull-right" data-toggle="tooltip" data-placement="left" title="Click to punch in">Out</span>
+                        </a>
+                    </td>
+                % }
+
+            </tr>
+
+        % }
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-default btn-primary pull-right" id="modify">Modify Hours of Selected</button>
+    <br><br><br>
+
+</div> <!-- /container -->
+
+
+
+
+<div class="modal" id="modifyModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form class="form-horizontal" method="post" action="/main/massModify">
+            <input type="hidden" name="employees" id="employees" value="">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Modify Hours</h4>                
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+
+                <div class="bs-callout bs-callout-info">
+                    <p>Company holidays are automatically added to employees hours.</p>
+                </div>
+
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                Changing hours for <b><span id="numEmps"></span></b> selected employees.
+                <br><br>
+
+                <div class="form-group">
+                    <label for="adjust" class="col-xs-4 control-label">Regular</label>
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control" id="adjust" name="adjust" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="holiday" class="col-xs-4 control-label">Holiday</label>
+                    <div class="col-xs-3">
+                        <input type="text" class="form-control" id="holiday" name="holiday" value="0">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-6">
+                        <input type="radio" class="" name="week" value="1" checked> Week 1 &nbsp;&nbsp;&nbsp;&nbsp; 
+                        <input type="radio" class="" name="week" value="2"> Week 2
+                    </div>
+                </div>
+
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="mSubmit">Modify</button>
+            </div> <!-- /modal-footer -->
+
+            </form>
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+</div> <!-- /punchModal -->
+
+
+
+
+
+<script type="text/javascript">
+
+    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+        "num-pre": function(a) {
+            return (a == "-") ? 0 : a;
+        },
+        "num-asc": function(a, b) {
+            return a - b;
+        },
+        "num-desc": function(a, b) {
+            return b - a;
+        }
+    });
+
+    function ucFirst(string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
+    }
+
+
+    $(function() {
+        $("#punch").tooltip();
+
+        $("#modifyModal").modal({
+            show: false,
+            backdrop: 'static' // won't close by clicking background
+        });
+
+        $("#modify").click(function() {
+            var empList = $(".empSel:checked").map(function(){ return this.id }).toArray();
+            $("#employees").val(empList.join(","));
+            $("#numEmps").html(empList.length);
+
+            $("#modifyModal").modal("show");
+            $("#adjust").focus();
+        });
+
+
+
+        $("#checkAll").change(function(e) {
+            // prop has the new state
+            var setTo = $("#checkAll").prop("checked");
+            $(".empSel").each(function(i, o) {
+                $(o).prop("checked", setTo);
+            });
+
+        });
+
+
+
+        $("#mainTable").dataTable({
+            bPaginate: false,
+            bFilter: false,
+            aaSorting: [[2, "asc"]],
+            aoColumns: [
+                {bSortable: false},
+                {sType:"num"},
+                null,
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                null
+            ],
+        });
+
+
+        var cEmpList = new Highcharts.Chart({
+            chart: {
+                type: 'column',
+                height: 150,
+                renderTo: 'chartEmployeeList',
+            },
+            title: { text: '' },
+            credits: { enabled: false },
+            legend: { verticalAlign: 'top' },
+            xAxis: {
+                labels: {
+                    enabled: false,
+                }
+            },
+            yAxis: {
+                title: { text: 'Hours' },
+                endOnTick: false,
+            },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    animation: false,
+                },
+                series: {
+                    events: {
+                        click: function(e) {
+                            window.location.href = '/employee/' + e.point.empID;
+                        },
+                    },
+                },
+            },
+
+
+            colors: ['#D9534F', '#5BC0DE', '#F0AD4E', '#5CB85C', '#428BCA'],
+        });
+        cEmpList.showLoading('Loading employee hours...');
+
+        $.getJSON('/chart/employeeList', function(res) {
+            $.each(['regular', 'vacation', 'sick', 'holiday', 'over'].reverse(), function(num, type) {
+                cEmpList.addSeries({
+                    name: ucFirst(type),
+                    data: res[type],
+                }, false);
+            });
+
+            cEmpList.hideLoading();
+            cEmpList.redraw();
+        });
+
+    });
+</script>
+

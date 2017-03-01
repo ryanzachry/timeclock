@@ -1,0 +1,51 @@
+% #
+% # This contains everything needed to read a badge and redirect
+% # to the punch page or refresh after a bad read.
+% #
+% # %= include 'badgeReader'    # <- to use
+% #
+
+<div style="top:200px;" id="reading" class="modal" tabindex="-1" role="dialog" aria-labelledby="Reading Badge" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h2>Reading Badge</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/libs/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    var iButton = "";
+
+    $(function() {
+        $("#reading").modal({ show: false });
+        $(window).keydown(handleKeyDown);
+    });
+
+    function handleKeyDown(e) {
+        $("#reading").modal('show');
+
+        // Start a timeout in case a bad read happens
+        if (iButton == "") {            
+            setTimeout(function() {
+                document.location.href = "/main?_=" + (new Date()).getTime();
+            }, 3000);
+        }
+
+        // The reader sends enter at the end of the serial
+        if (e.keyCode == 13) {
+            document.location.href = "/punch/" + iButton + "?_=" + (new Date()).getTime();
+            iButton = "";
+        }
+        // try to limit some garbage from getting through
+        else if (e.keyCode >= 0x30 && e.keyCode <= 0x7a) {
+            iButton += String.fromCharCode(e.keyCode);
+        }
+
+	    // No need to stop the key, and not blocking lets us refresh easy in dev
+        // e.preventDefault();
+    }
+</script>
+

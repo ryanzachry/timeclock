@@ -1,0 +1,107 @@
+% layout 'default';
+
+
+<div class="row">
+	<div class="col-lg-12" style="font-size:6em;"><b><%= $e->{first_name} . " " . $e->{last_name} %></b></div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<button type="button" class="btn btn-primary btn-large" style="font-size:4em; width:100%; border-radius:0; padding:0; font-weight:bold;">
+			<%= $e->{status} ? "IN" : "OUT" %>
+		</button>
+	</div>
+</div> 
+
+<br />
+
+% my @weekDays = qw/Mon Tue Wed Thu Fri Sat Sun/;
+
+% for my $week (1..2) {
+% my $w = "W$week";
+
+<div class="row">
+	% if ($week == 1) {
+    <div class="col-lg-6" style="padding-left:25px;">
+	% } else {
+    <div class="col-lg-6" style="padding-right:35px;">
+	% }
+        <h3 class="noprint punchDates"><%= prettyDateRange($dates->{"start$w"}, $dates->{"end$w"}) %></h3>
+        <table class="table table-condensed punchTimes">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td style="min-width:60px;">&nbsp;</td>
+                    <th>Punch Time</th>
+                    <th>Day Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                % my $weekTotal = 0;
+                % my @days = ($week == 1) ? (0..6) : (7..13);
+                % for my $dayOfPeriod (@days) {
+                    % my $dayTotal = 0;
+
+                    % my $first = 1;
+                    % if (exists($periodPunches->{$dayOfPeriod})) {
+                        % my @daysPunches = @{ $periodPunches->{$dayOfPeriod} };
+                        % for my $p (@daysPunches) {
+
+                            % if ($first && defined($p->{in})) {
+                                % $first = 0;
+                                <tr>
+                                    <td style="font-weight:bold; background-color:#eeeeee; text-align:right;"><%= $weekDays[ $dayOfPeriod % 7 ] %></td> 
+
+                            % } elsif (defined($p->{in})) {
+                                <tr><td></td>
+                            % }
+
+                            % if (defined($p->{in}) && defined($p->{out})) {
+                                % my $hours = ($p->{out} - $p->{in}) / 60 / 60;
+                                % $dayTotal  += $hours;
+                                % $weekTotal += $hours;
+
+                                    <td>
+                                        <a href="#" class="punch" tardy="<%= $p->{tardy} %>"> 
+                                            <%= $p->{inTime} %> - <%= $p->{outTime} %>  
+                                        </a>    
+                                    </td>   
+                                    <td align="right"><%= round($hours,     2) %></td>  
+                                    <td align="right"><%= round($dayTotal,  2) %></td>  
+                                </tr>
+                            % } else {
+
+                                    <td><a href="#" class="punch"> <%= $p->{inTime} %> - </a></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            % }
+                        % }
+                    % } else {
+                        <!-- <tr><td colspan="4">&nbsp;</td></tr> -->
+                    % }
+                % }
+            </tbody>
+        </table>
+    </div> <!-- /col 6 -->
+% } # for week 
+</div> <!-- /row -->
+
+
+
+%= include 'badgeReader'
+
+<script type="text/javascript">
+    var timeout;
+
+	$(function() {
+		$.ajaxSetup({ cache: false });
+	
+        timeout = setTimeout(function() {
+			document.location.href = "/main?_=" + (new Date()).getTime();
+		}, 10000);
+
+        $(window).keydown(function() { clearInterval(timeout); });
+	});
+
+</script>

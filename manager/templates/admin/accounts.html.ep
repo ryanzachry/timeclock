@@ -1,0 +1,318 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Time Manager Accounts
+            <span class="text-muted" style="font-size:.7em;"></span>
+            <button type="button" id="addAcct" class="btn btn-primary pull-right">Add Account</button>
+        </h1>
+    </div>
+
+    <div class="bs-callout bs-callout-info">
+        Click a username to edit the account. 
+        Click 
+            <button type="button" class="btn btn-default btn-xs">
+                <span class="glyphicon glyphicon-th"></span>
+            </button>
+        to edit the account's access.
+    </div>
+
+
+    % if (flash('error')) {
+        <div class="bs-callout bs-callout-danger">
+            <p>Error: <%= flash('error') %></p>
+        </div>
+    % }
+
+    <div class="row">
+        <div class="col-xs-6">
+            <h3>Admins</h3>
+            <table class="table table-striped">
+                <tr>
+                    <th>Username</th>
+                    <th>Location</th>
+                    <th>Last Login</th>
+                    <th>Comments</th>
+                </tr>
+        
+                % for my $a (@$admins) {
+                <tr>
+                    <td><a href="#" class="editAcct" empID="<%= $a->{id} %>"><%= $a->{user} %></a></td>
+                    <td><%= $a->{loc_desc} %></td>
+                    <td></td>
+                    <td><%= $a->{comments} %></td>
+                </tr>
+                % }
+            </table>
+        </div>
+
+        <div class="col-xs-6">
+            <h3>Regular</h3>
+            <table class="table table-striped">
+                <tr>
+                    <th></th>
+                    <th>Username</th>
+                    <th>Location</th>
+                    <th>Last Login</th>
+                    <th>Comments</th>
+                </tr>
+        
+                % for my $a (@$regulars) {
+                <tr>
+                    <td>
+                        <button type="button" class="btn btn-default btn-xs editAccess" empID="<%= $a->{id} %>">
+                            <span class="glyphicon glyphicon-th"></span>
+                        </button>
+                    </td>
+                    <td><a href="#" class="editAcct" empID="<%= $a->{id} %>"><%= $a->{user} %></a></td>
+                    <td><%= $a->{loc_desc} %></td>
+                    <td></td>
+                    <td><%= $a->{comments} %></td>
+                </tr>
+                % }
+            </table>
+        </div>
+
+    </div>
+
+
+</div> <!-- /container -->
+
+
+
+
+
+<div class="modal" id="addAcctModal" role="dialog">
+    <form method="post" action="/admin/accounts/add" class="form-horizontal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add an Account</h4>
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+                <div class="bs-callout bs-callout-info">
+                    <p>Username should be a Company account (the first part of their email).</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="user" class="col-xs-2 control-label">Username</label>
+                    <div class="col-xs-6">
+                        <input type="text" name="user" id="user" class="form-control">
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="admin" class="col-xs-2 control-label">Admin</label>
+                    <div class="col-xs-6" style="padding-top: 7px;">
+                            <input type="radio" name="admin" value="0" checked>No &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="radio" name="admin" value="1">Yes
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="location" class="col-xs-2 control-label">Location</label>
+                    <div class="col-xs-6">
+                        <select class="form-control" name="location">
+                            % for (@$locations) {
+                                <option value="<%= $_->{id} %>"><%= $_->{loc_desc} %></option>
+                            % }
+                        </select>
+                    </div>
+                </div> <!-- /form-group -->
+                <div class="form-group">
+                    <label for="user" class="col-xs-2 control-label">Comments</label>
+                    <div class="col-xs-6">
+                        <input type="text" name="comments" id="comments" class="form-control">
+                    </div>
+                </div> <!-- /form-group -->
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Account</button>
+            </div> <!-- /modal-footer -->
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+    </form>
+</div> <!-- /addAcctModal -->
+
+
+
+
+<div class="modal" id="editAcctModal" role="dialog">
+    <form method="post" action="/admin/accounts/edit" class="form-horizontal">
+    <input type="hidden" id="eID" name="eID">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Edit Account</h4>
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="user" class="col-xs-2 control-label">Username</label>
+                    <div class="col-xs-6">
+                        <input type="text" name="eUser" id="eUser" class="form-control" disabled>
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="admin" class="col-xs-2 control-label">Admin</label>
+                    <div class="col-xs-6" style="padding-top: 7px;">
+                            <input type="radio" name="eAdmin" value="0" checked>No &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="radio" name="eAdmin" value="1">Yes
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="location" class="col-xs-2 control-label">Location</label>
+                    <div class="col-xs-6">
+                        <select class="form-control" name="eLocation" id="eLocation">
+                            % for (@$locations) {
+                                <option value="<%= $_->{id} %>"><%= $_->{loc_desc} %></option>
+                            % }
+                        </select>
+                    </div>
+                </div> <!-- /form-group -->
+                <div class="form-group">
+                    <label for="eComments" class="col-xs-2 control-label">Comments</label>
+                    <div class="col-xs-9">
+                        <input type="text" name="eComments" id="eComments" class="form-control">
+                    </div>
+                </div> <!-- /form-group -->
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <a href="/admin/accounts/delete/id" id="delAccount" class="btn btn-danger pull-left">Delete Account</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div> <!-- /modal-footer -->
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+    </form>
+</div> <!-- /editAcctModal -->
+
+
+
+
+<div class="modal" id="editAccessModal" role="dialog">
+    <form method="post" action="/admin/accounts/edit/access" class="form-horizontal" id="eaForm">
+    <input type="hidden" id="eaID" name="eaID">
+    <input type="hidden" id="eaAccess" name="eaAccess">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Employee access for <b><span id="eaWho"></span></b></h4>
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <div class="col-xs-4" id="eaList1"></div>
+                    <div class="col-xs-4" id="eaList2"></div>
+                    <div class="col-xs-4" id="eaList3"></div>
+                </div>
+
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="eaSave">Save Changes</button>
+            </div> <!-- /modal-footer -->
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+    </form>
+</div> <!-- /editAccessModal -->
+
+
+
+
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+        //
+        //
+        //
+        $("#addAcctModal").modal({ 
+            show: false, 
+            backdrop: 'static' 
+        });        
+
+        $("#addAcct").click(function() {
+            $("#addAcctModal").modal('show');            
+            $("#user").val("");
+            $("#comments").val("");
+            $("#user").focus();
+        });
+
+
+        //
+        //
+        //
+        $("#editAcctModal").modal({ 
+            show: false, 
+            backdrop: 'static' 
+        });
+
+        $(".editAcct").click(function() {
+            var empID = $(this).attr("empID");
+            $("#editAcctModal").modal('show');
+            $("#eID").val(empID);
+            $("#delAccount").prop('href', '/admin/accounts/delete/' + empID);
+            $.getJSON("/admin/accounts/" + empID, function(a) {
+                $("#eUser").val(a.user);
+                $("input[name='eAdmin']")[a.admin].checked = true;
+                $("#eLocation option[value='" + a.location_id + "']").prop('selected', 'selected');
+                $("#eComments").val(a.comments);
+            });
+            return false;
+        });
+
+
+        //
+        //
+        //
+        $("#editAccessModal").modal({
+            show: false,
+            backdrop: 'static'
+        });
+
+        $(".editAccess").click(function() {
+            var empID = $(this).attr('empID');            
+            $("#eaID").val(empID);
+            $("#eaList1,#eaList2,#eaList3").html("");
+
+            $.getJSON("/admin/accounts/access/" + empID, function(a) {
+                $("#eaWho").html(a.user);
+                var buttons = new Array();
+                var splitAt = Math.floor(a.emps.length / 3) + 1;
+                $.each(a.emps, function(i, e) {
+                    var list = Math.floor(i / splitAt) + 1;
+                    var button = '<button style="text-align:left; padding-left:10px;" type="button" class="btn pull-left btn-block btn-xs btn-default eab" id="eab' + e.employee_id + '">' + e.name + '</button>';
+                    $("#eaList" + list).html( $("#eaList" + list).html() + button);
+                });
+
+                $("#editAccessModal").modal('show');
+                $.each(a.access, function(i, e) { $("#eab" + e).toggleClass("btn-primary"); });
+                $(".eab").click(function() { $(this).toggleClass("btn-primary"); });
+            });
+        });
+
+        $("#eaSave").click(function() {
+            // set the new access
+            var a = $(".eab.btn-primary")
+                .map(function(){ return this.id.replace('eab', '') })
+                .toArray()
+                .join(',');
+
+            $("#eaAccess").val(a);
+            $("#eaForm").submit();
+        });
+
+    });
+</script>

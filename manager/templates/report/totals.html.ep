@@ -1,0 +1,173 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Time Totals
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="row hidden-print">
+        <div class="col-xs-12 clickableColChart" id="chartEmployeeList"></div>
+    </div>
+
+
+    <table id="mainTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th> 
+                <th>Name</th>
+                <th class="text-right">Regular</th>
+                <th class="text-right">Overtime</th>
+                <th class="text-right">Vacation</th>
+                <th class="text-right">Sick</th>
+                <th class="text-right">Holiday</th>
+            </tr>
+        </thead>
+        <tbody>
+        % my (%totals, %totalsNoTemps);
+        % for my $empID (accountEmployees()) {
+            % my $e = employeeDetails($empID);
+            % my $t = calcEmployeeTime($empID, session("period"));
+            % my $name = "$e->{first_name} $e->{last_name}";
+
+            % $totals{$_} += $t->{$_} for (qw/regular over vacation sick holiday/);
+            % unless ($e->{temp} == 1) {
+            %   $totalsNoTemps{$_} += $t->{$_} for (qw/regular over vacation sick holiday/);
+            % }
+
+            <tr>
+                <td class="text-left"><%= $e->{as400_id} %></td>
+                <td><a href="/employee/<%= $empID %>"><%= $name %></a></td>
+                <td class="text-right"><%== prettyTime($t->{regular}  / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{over}     / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{vacation} / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{sick}     / 60) %></td>
+                <td class="text-right"><%== prettyTime($t->{holiday}  / 60) %></td>
+            </tr>
+
+        % }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>&nbsp;</th> 
+                <th>&nbsp;</th>
+                <th class="text-right">Regular</th>
+                <th class="text-right">Overtime</th>
+                <th class="text-right">Vacation</th>
+                <th class="text-right">Sick</th>
+                <th class="text-right">Holiday</th>
+            </tr>        
+            <tr>    
+                <td colspan="2" class="text-right"><b>Total (excluding temp employees)</b></td>
+                <td class="text-right"><b><%== prettyTime($totalsNoTemps{regular}  / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totalsNoTemps{over}     / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totalsNoTemps{vacation} / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totalsNoTemps{sick}     / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totalsNoTemps{holiday}  / 60) %></b></td>
+            </tr>
+            <tr>
+                <td colspan="2" class="text-right"><b>Grand Total</b></td>
+                <td class="text-right"><b><%== prettyTime($totals{regular}  / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totals{over}     / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totals{vacation} / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totals{sick}     / 60) %></b></td>
+                <td class="text-right"><b><%== prettyTime($totals{holiday}  / 60) %></b></td>
+            </tr>
+        </tfoot>
+    </table>
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+
+    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+        "num-pre":  function(a)    { return (a == "-") ? 0 : a; },
+        "num-asc":  function(a, b) { return a - b; },
+        "num-desc": function(a, b) { return b - a; }
+    });
+
+    function ucFirst(string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
+    }
+
+
+    $(function() {
+
+        $("#mainTable").dataTable({
+            bPaginate: false,
+            bFilter: false,
+            oLanguage: { sInfo: "" }, // hides "Showing X of X ..." at the bottom
+            aaSorting: [[1, "asc"]],
+            aoColumns: [
+                {sType:"num"},
+                null,
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+                {sType:"num"},
+            ],
+        });
+
+
+        var cEmpList = new Highcharts.Chart({
+            chart: {
+                type: 'column',
+                height: 150,
+                renderTo: 'chartEmployeeList',
+            },
+            title: { text: '' },
+            credits: { enabled: false },
+            legend: { verticalAlign: 'top' },
+            xAxis: {
+                labels: {
+                    enabled: false,
+                }
+            },
+            yAxis: {
+                title: { text: 'Hours' },
+                endOnTick: false,
+            },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    animation: false,
+                },
+                series: {
+                    events: {
+                        click: function(e) {
+                            window.location.href = '/employee/' + e.point.empID;
+                        },
+                    },
+                },
+            },
+
+
+            colors: ['#D9534F', '#5BC0DE', '#F0AD4E', '#5CB85C', '#428BCA'],
+        });
+        cEmpList.showLoading('Loading employee hours...');
+
+        $.getJSON('/chart/employeeList', function(res) {
+            $.each(['regular', 'vacation', 'sick', 'holiday', 'over'].reverse(), function(num, type) {
+                cEmpList.addSeries({
+                    name: ucFirst(type),
+                    data: res[type],
+                }, false);
+            });
+
+            cEmpList.hideLoading();
+            cEmpList.redraw();
+        });
+
+
+
+    });
+</script>
+

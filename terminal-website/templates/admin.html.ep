@@ -1,0 +1,148 @@
+% layout 'default';
+
+<div id="wrap">
+<button type="button" class="btn btn-success btn-large banner">
+    Setup a New Employee
+</button>
+
+<div class="container">
+    % if ($moreAvail == 1 || param("page") != 1) {
+    <br>
+    <div class="row">
+        <div class="col-sm-4">
+            % my $prevPage = param("page") - 1;
+            % if (param("page") > 1) {
+                <a href="/admin/<%= $prevPage %>" id="prevPage" class="pull-left btn btn-large btn-primary">Previous Page</a>
+            % } 
+        </div>
+        <div class="col-sm-4">&nbsp;</div>
+        <div class="col-sm-4">
+            % my $nextPage = param("page") + 1;
+            % if ($moreAvail == 1) {
+                <a href="/admin/<%= $nextPage %>" id="nextPage" class="pull-right btn btn-large btn-primary">Next Page</a>
+            % } 
+        </div>
+    </div> <!-- /row -->
+    % }
+
+    <div class="row">
+        <br><br>
+        % my $splitAt = int((scalar(@$employees) / 3) + .99);
+        % for my $col (1..3) {
+            <div class="col-sm-4">
+            % for my $entry (1..$splitAt) {
+                % my $e = shift(@$employees);
+                % last unless (defined($e));
+                    <button 
+                        style="text-align:left; padding-left:10px; font-size:1.5em; width: 100%" 
+                        type="button" 
+                        class="btn pull-left btn-block btn-default addBadge btn-large"
+                        id="<%= $e->{employee_id} %>" 
+                        >
+                        <%= $e->{first_name} . " " . $e->{last_name} %>
+                    </button>
+            % }
+            </div> <!-- /col-sm-3 -->
+        % }
+    </div> <!-- /row -->
+
+</div> <!-- /container -->
+</div> <!-- /wrap -->
+
+
+<div id="footer">
+    <div class="container">
+        <button type="button" id="reboot" class="pull-left btn btn-large btn-warning">Reboot Device</button>        
+        <button type="button" id="toggleActive" class="pull-left btn btn-large" style="margin-left:10px;">Keep Active</button>
+        <span style="padding-left:30px; line-height:90px; color:#aaa;">
+            Android ID: <%= uc($android_id) %> - 
+            <%= $terminal->{name} %>
+        </span>
+        <button type="button" id="signout" class="pull-right btn btn-large btn-primary">Sign Out</button>
+    </div>
+</div>
+
+<div style="top:200px;" id="reading" class="modal" tabindex="-1" role="dialog" aria-labelledby="Reading Badge" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h2>Reading Badge</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/libs/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	var iButton = "";
+
+    $(function() {
+		$.ajaxSetup({ cache: false });
+
+        $("#reading").modal({ show: false });
+        $(window).keydown(handleKeyDown);
+
+        try { 
+            android.showUIBars(); 
+            if (android.isActive()) $("#toggleActive").addClass("btn-success");
+        } catch (e) { }
+
+        $("#signout").click(function() {
+            document.location.href = "/admin/signout?_=" + (new Date()).getTime();
+        });
+
+        $("#reboot").click(function() {
+            try { android.reboot(); } catch (e) { }
+        });
+
+        $("#toggleActive").click(function() {
+            try { 
+                if (android.isActive()) {
+                    android.setActive(false);
+                    $("#toggleActive").removeClass("btn-success");
+                }
+                else {
+                    android.setActive(true);
+                    $("#toggleActive").addClass("btn-success");
+                }
+            } catch (e) { }
+        });
+
+
+        $(".addBadge").click(function() {
+            document.location.href = "/admin/addBadge/" + this.id + "?_=" + (new Date()).getTime();
+        });
+
+        // auto sign out after 2 minutes
+        setTimeout(function() { document.location.href = "/admin/signout?_=" + (new Date()).getTime(); }, 120000);
+
+    });
+
+
+    function handleKeyDown(e) {
+        $("#reading").modal('show');
+
+        // Start a timeout in case a bad read happens
+        if (iButton == "") {
+            setTimeout(function() {
+                document.location.href = "/admin/?_=" + (new Date()).getTime();
+            }, 3000);
+        }
+
+        // The reader sends enter at the end of the serial
+        if (e.keyCode == 13) {
+            document.location.href = "/admin/identify/" + iButton + "?_=" + (new Date()).getTime();
+            iButton = "";
+        }
+        // try to limit some garbage from getting through
+        else if (e.keyCode >= 0x30 && e.keyCode <= 0x7a) {
+            iButton += String.fromCharCode(e.keyCode);
+        }
+
+        // No need to stop the key, and not blocking lets us refresh easy in dev
+        // e.preventDefault();
+    }
+
+</script>
+

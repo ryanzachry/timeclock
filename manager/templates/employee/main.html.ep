@@ -1,0 +1,789 @@
+% layout 'default';
+
+
+<!--
+<div class="progress">
+    <div class="progress-gap" style="width: 25%;"></div>
+    <div class="progress-bar progress-bar-success" style="width: 25%"></div>
+    <div class="progress-bar progress-bar-warning" style="width: 20%"></div>
+    <div class="progress-bar progress-bar-danger" style="width: 10%"></div>
+</div> 
+-->
+
+
+
+<div class="container">
+
+    %= include 'header'
+
+    % my $e = employeeDetails( param("empID") );
+    <div class="page-header">    
+	    <h1>
+	    	<%= $e->{first_name} . " " . $e->{last_name} %>
+	    	<span class="text-muted" style="font-size:.7em;">(<%= $e->{as400_id} %>)</span>
+            
+            <span class="text-muted" style="font-size:.5em;">
+                <br>
+                % if ($tardies == 0) {
+                    No tardies
+                % } elsif ($tardies == 1) {
+                    1 tardy 
+                    (<a href="/employee/<%= param("empID") %>/tardies">see it</a>)
+                % } else {
+                    <%= $tardies %> tardies
+                    (<a href="/employee/<%= param("empID") %>/tardies">see all</a>)
+                % }
+            </span>
+            % if ($e->{status}) {
+                <a href="/employee/<%= param("empID") %>/punch">
+                    <span id="punch" class="label label-info pull-right" data-toggle="tooltip" data-placement="left" title="Click to punch out">&nbsp;&nbsp;In&nbsp;&nbsp;</span>
+                </a>
+            % } else {
+                <a href="/employee/<%= param("empID") %>/punch">
+                    <span id="punch" class="label label-default pull-right" data-toggle="tooltip" data-placement="left" title="Click to punch in">Out</span>
+                </a>
+            % }
+	    </h1>
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12 clickableColChart" id="chartTotalsHistory">
+        </div>
+    </div>
+    <hr>
+
+    % my $t = calcEmployeeTime($e->{employee_id}, session("period"));
+    <div class="row">
+        <div class="col-xs-6">
+            <form method="post" action="/employee/modifyHours" class="form-horizontal">
+            <input type="hidden" name="empID" value="<%= param("empID") %>">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td align='right'><b>Week 1</b></td>
+                        <td align='right'><b>Week 2</b></td>
+                        <td align='right'><b>Total</b></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td align="right">Total</td>
+                        <td align="right"><%= prettyTime($t->{totalW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{totalW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{total} / 60) %></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="right">Actual</td>
+                        <td align="right"><%= prettyTime($t->{actualW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{actualW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{actual} / 60) %></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><b>Regular</b></td>
+                        <td align="right"><%= prettyTime($t->{regularW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{regularW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{regular} / 60) %></td>
+						<td>&nbsp;</td>
+                        <!-- <td align="right"><input name="adjust" type="text" class="form-control" name="" style="width:50px; height:22px; padding:3px;"></td> -->
+                    </tr>
+                    <tr>
+                        <td align="right"><b>Overtime</b></td>
+                        <td align="right"><%= prettyTime($t->{overW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{overW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{over} / 60) %></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td align="right"><b>Vacation (PTO)</b></td>
+                        <td align="right"><%= prettyTime($t->{vacationW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{vacationW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{vacation} / 60) %></td>
+                        <td align="right"><input name="vacation" type="text" class="form-control" name="" style="width:50px; height:22px; padding:3px;"></td>
+                    </tr>
+                    <tr>
+                        <td align="right"><b>Sick</b></td>
+                        <td align="right"><%= prettyTime($t->{sickW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{sickW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{sick} / 60) %></td>
+						<td>&nbsp;</td>
+                        <!-- <td align="right"><input name="sick" type="text" class="form-control" name="" style="width:50px; height:22px; padding:3px;"></td> -->
+                    </tr>
+                    <tr>
+                        <td align="right"><b>Holiday</b></td>
+                        <td align="right"><%= prettyTime($t->{holidayW1} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{holidayW2} / 60) %></td>
+                        <td align="right"><%= prettyTime($t->{holiday} / 60) %></td>
+						<td>&nbsp;</td>
+                        <!-- <td align="right"><input name="holiday" type="text" class="form-control" name="" style="width:50px; height:22px; padding:3px;"></td> -->
+                    </tr>                    
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>&nbsp;</td>                        
+                        <td align="right">
+                            <input type="radio" name="week" value="1" checked> Week 1
+                        </td>
+                        <td align="right">
+                            <input type="radio" name="week" value="2"> Week 2
+                        </td>
+                        <td colspan="2" align="right">
+                            <button type="submit" class="btn btn-primary" name="modifyHours">Modify Hours</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            </form>
+        </div> <!-- /col 6 -->
+
+        <div class="col-xs-6">
+            <div id="chartPeriodSummary"></div>
+        </div>
+
+    </div> <!-- /row -->
+
+
+    <br><br>
+
+
+    % my @weekDays = qw/Monday Tuesday Wednesday Thursday Friday Saturday Sunday/;
+    % my $dates = datesForPeriod( session("period") );
+    % my $periodPunches = periodPunches(param("empID"), session("period"), 1);
+
+    % for my $week (1..2) {
+        % my $w = "W$week";
+
+        <div class="row">
+            <div class="col-xs-6">
+                <h3><%= prettyDateRange($dates->{"start$w"}, $dates->{"end$w"}) %></h3>
+                <hr>
+                <div class="clickableColChart" id="<%= "chartWeek$week" %>"></div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <td align="left">
+                                <button type="button" class="btn btn-default btn-xs btn-primary addPunch" week="<%= $week %>">
+                                    <span class="glyphicon glyphicon-plus-sign"></span> Add a Punch
+                                </button>
+                            </td>                          
+                            <th>Punch Time</th>
+                            <th>Day Total</th>
+                            <th>Week Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>        
+                        % my $weekTotal = 0;
+                        % my @days = ($week == 1) ? (0..6) : (7..13);
+                        % for my $dayOfPeriod (@days) {
+                            % my $dayTotal = 0;
+
+                            <th colspan="4" style="background-color: #eeeeee;">
+                                <%= $weekDays[ $dayOfPeriod % 7 ] %>
+                            </th>
+
+                            % if (exists($periodPunches->{$dayOfPeriod})) {
+                                % my @daysPunches = @{ $periodPunches->{$dayOfPeriod} };                            
+                                % for my $p (@daysPunches) {
+                                    % if (defined($p->{in}) && defined($p->{out})) {
+                                        % my $hours = ($p->{out} - $p->{in}) / 60 / 60;
+                                        % $dayTotal  += $hours;
+                                        % $weekTotal += $hours;
+                                        <tr>
+                                            <td>
+                                                <a href="#" class="punch" inID="<%= $p->{inID} %>" outID="<%= $p->{outID} %>" tardy="<%= $p->{tardy} %>">
+                                                    <%= $p->{inTime} %> - <%= $p->{outTime} %>
+                                                </a>
+                                            </td>
+                                            <td align="right"><%= round($hours,     2) %></td>
+                                            <td align="right"><%= round($dayTotal,  2) %></td>
+                                            <td align="right"><%= round($weekTotal, 2) %></td>
+                                        </tr>
+                                    % } else {
+                                        <tr>
+                                            <td>
+                                                <a href="#" class="nochangepunch" inID="<%= $p->{inID} %>" tardy="<%= $p->{tardy} %>">
+                                                <%= $p->{inTime} %> - 
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    % }
+                                % }
+                            % } else {
+                                <tr><td colspan="4">&nbsp;</td></tr>
+                            % }
+                        % }
+                    </tbody>
+                </table>
+            </div> <!-- /col 6 -->
+
+        % } # for week 
+
+    </div> <!-- /row -->
+
+
+</div> <!-- /container -->
+
+
+
+<div class="modal" id="addPunchModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form class="form-horizontal" method="post" action="/employee/addPunch">
+            <input type="hidden" name="apEmpID" value="<%= param("empID") %>">
+            <input type="hidden" name="apDOP" id="apDOP" value="">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Add a Punch</h4>                
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+
+            <div class="row">
+                <div class="col-xs-3" style="border-right: 3px solid #ddd;">
+                    Choose a Day:
+
+                    % for my $dow (0..6) {
+                        <button type="button" dow="<%= $dow %>" class="btn pull-left btn-block btn-xs btn-default apDayButton"><%= $weekDays[$dow] %></button>
+                    % }
+
+                </div> <!-- /col-xs-3 -->
+
+                <div class="col-xs-9" style="padding-left: 30px;" id="apRight">
+
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Existing punches for the day</div>
+                        <div class="panel-body" id="apExisting"></div>
+                    </div>
+
+                    <div id="apNew">
+
+                        <div class="form-group">
+                            <label for="apInTime" class="col-xs-1 control-label">In</label>
+                            <div class="col-xs-3">
+                                <input type="text" name="apInTime" id="apInTime" class="form-control">
+                            </div>
+                            <div class="col-xs-5" style="padding-top: 7px;">
+                                <input type="radio" name="apIampm" value="a" checked>AM &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="radio" name="apIampm" value="p">PM
+                            </div>
+                        </div> <!-- /form-group -->
+
+                        <div class="form-group">
+                            <label for="apOutTime" class="col-xs-1 control-label">Out</label>
+                            <div class="col-xs-3">
+                                <input type="text" name="apOutTime" id="apOutTime" class="form-control">
+                            </div>
+                            <div class="col-xs-5" style="padding-top: 7px;">
+                                <input type="radio" name="apOampm" value="a" checked>AM &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="radio" name="apOampm" value="p">PM
+                            </div>
+                        </div> <!-- /form-group -->
+
+                        <div class="form-group">
+                            <label for="apReason" class="col-xs-2 control-label">Reason</label>
+                            <div class="col-xs-9">
+                                <select name="apReason" class="form-control">
+                                    <option value="0">Other (Enter reason below)</option>
+                                    % for (@$reasons) {                                
+                                        <option value="<%= $_->{reason_id} %>"><%= $_->{description} %></option>
+                                    % }
+                                </select>
+                                <br>
+                                <input type="text" class="form-control" name="apOther" id="apOther" placeholder="Other reason...">
+                            </div>
+                        </div> <!-- /form-group -->
+                        
+                    </div>
+                </div> <!-- /col-xs-6 -->
+
+            </div>
+
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="apSubmit">Add Punch</button>
+            </div> <!-- /modal-footer -->
+
+            </form>
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+</div> <!-- /punchModal -->
+
+
+
+
+<div class="modal" id="modifyPunchModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form class="form-horizontal" method="post" action="/employee/modifyPunch" id="mpForm">
+            <input type="hidden" name="mpEmpID" id="mpEmpID" value="<%= param("empID") %>">
+            <input type="hidden" name="mpInPunchID" id="mpInPunchID">
+            <input type="hidden" name="mpOutPunchID" id="mpOutPunchID">
+            <input type="hidden" name="mpTardyID" id="mpTardyID">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Modify Punch</h4>
+            </div> <!-- /modal-header -->
+            <div class="modal-body">                
+                <span id="mpExisting"></span>
+                <hr>
+
+                <div class="form-group">
+                    <label for="mpInTime" class="col-xs-2 control-label">In</label>
+                    <div class="col-xs-3">
+                        <input type="text" name="mpInTime" id="mpInTime" class="form-control">
+                    </div>
+                    <div class="col-xs-5" style="padding-top: 7px;">
+                        <input type="radio" name="mpIampm" value="am" checked>AM &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="mpIampm" value="pm">PM
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="mpOutTime" class="col-xs-2 control-label">Out</label>
+                    <div class="col-xs-3">
+                        <input type="text" name="mpOutTime" id="mpOutTime" class="form-control">
+                    </div>
+                    <div class="col-xs-5" style="padding-top: 7px;">
+                        <input type="radio" name="mpOampm" value="am" checked>AM &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="mpOampm" value="pm">PM
+                    </div>
+                </div> <!-- /form-group -->
+
+                <div class="form-group">
+                    <label for="mpReason" class="col-xs-2 control-label">Reason</label>
+                    <div class="col-xs-7">
+                        <select name="mpReason" class="form-control">
+                            <option value="0">Other (Enter reason below)</option>
+                            % for (@$reasons) {                                
+                                <option value="<%= $_->{reason_id} %>"><%= $_->{description} %></option>
+                            % }
+                        </select>
+                        <br>
+                        <input type="text" class="form-control" name="mpOther" id="mpOther" placeholder="Other reason...">
+                    </div>
+                </div> <!-- /form-group -->
+
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger pull-left" id="delPunch">Delete Punch</button>
+
+                % if (session("admin") == 1) {
+                <button type="button" class="btn btn-warning pull-left" id="markTardy">Mark Tardy</button>
+                <button type="button" class="btn btn-warning pull-left" id="removeTardy">Remove Tardy</button>
+                % }
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" id="modifyPunch" class="btn btn-primary">Modify Punch</button>
+            </div> <!-- /modal-footer -->
+            </form>
+
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+</div> <!-- /punchModal -->
+
+
+
+<script type="text/javascript">
+    function ucFirst(string) {
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
+    }
+
+    function round(n) {
+        return Math.ceil(n * 100) / 100;
+    }
+
+    $(function() {
+        $.ajaxSetup({ cache: false });
+
+        $("#punch").tooltip();
+
+        $("#addPunchModal").modal({ 
+            show: false,
+            backdrop: 'static', // won't close by clicking background
+        });
+
+        $("#modifyPunchModal").modal({ 
+            show: false,
+            backdrop: 'static',
+        });
+
+
+        // make sure some reason or other description is entered
+        $("#mpOther").popover({
+            trigger: 'manual',
+            html: true,
+            placement: 'bottom',
+            content: '<p style="color:#D9534F;"><b>Select or enter a new reason</b></p>',
+        });
+        $("#modifyPunch").click(function() {
+            if ($("select[name='mpReason']").val() == "0" && $("#mpOther").val() == "") {
+                $("#mpOther").popover('show');
+                $("#mpOther").focus();
+                return false;
+            }
+            else {
+                $("#mpOther").popover('hide');
+            }
+        });        
+
+
+
+        //
+        //
+        //
+        var apWeek;
+        $(".apDayButton").click(function() { 
+            $(".apDayButton").removeClass("btn-primary");
+            $(this).addClass("btn-primary");
+            $(this).blur();
+
+            var dayOfPeriod = parseInt($(this).attr("dow"), 10);
+            if (apWeek == 2) dayOfPeriod += 7;
+            $("#apDOP").val(dayOfPeriod);
+
+            $.getJSON("/employee/<%= param('empID') %>/dayTimes/" + dayOfPeriod, function(res) {
+                var html = [];
+                html.push('<table style="margin-left:30px;">');
+                $.each(res.punches, function(i, p) {
+                    html.push('<tr>');
+                    html.push('<td align="right">' + p.inTime + '</td>');
+                    html.push('<td align="center"> &nbsp;&nbsp;-&nbsp;&nbsp; </td>');
+                    html.push('<td align="right">' + p.outTime + '</td>');
+                    html.push('</tr>');
+                    // html.push(p.inTime + ' - ' + p.outTime + '<br>');
+                });
+                html.push('</table>');
+
+                if (res.punches.length == 0) {
+                    html = ['No existing punches for the day.'];
+                }
+                $('#apExisting').html( html.join('') );
+                $("#apRight").show();
+                $("#apInTime").focus();
+            });
+
+        });
+        $(".addPunch").click(function() {
+            apWeek = $(this).attr("week");
+            $(".apDayButton").removeClass("btn-primary");
+            $("#apExisting").html("");
+            $("#apRight").hide();
+            $("#apOther").popover('hide');
+            $("#addPunchModal").modal('show');
+        });
+
+        // make sure some reason or other description is entered
+        $("#apOther").popover({
+            trigger: 'manual',
+            html: true,
+            placement: 'bottom',
+            content: '<p style="color:#D9534F;"><b>Select or enter a new reason</b></p>',
+        });
+        $("#apSubmit").click(function() {
+            if ($("select[name='apReason']").val() == "0" && $("#apOther").val() == "") {
+                $("#apOther").popover('show');
+                $("#apOther").focus();
+                return false;
+            }
+            else {
+                $("#apOther").popover('hide');
+            }            
+        });
+
+
+        $(".nochangepunch").click(function() { return false; });
+
+        $(".punch").click(function() {            
+            // var dayOfPeriod = parseInt($(this).attr("dow"), 10);
+            var inID = $(this).attr('inID');
+            var tardy = $(this).attr('tardy');
+            $("#mpInPunchID").val( $(this).attr('inID') );
+            $("#mpOutPunchID").val( $(this).attr('outID') );
+            $("#mpTardyID").val(tardy);
+
+            $.getJSON("/employee/<%= param('empID') %>/dayTimesByPunch/" + inID, function(res) {
+                var html = ['Other Punches for the Day:<br>'];
+                html.push('<table style="margin-left:30px;">');
+                $.each(res.punches, function(i, p) {
+                    if (p.inID == inID) {
+                        var inT  = p.inTime.split(' ');
+                        $("#mpInTime").val(inT[0]);
+                        $("input[name='mpIampm'][value='" + inT[1] + "']:radio").prop('checked', 'checked');
+
+                        var outT = p.outTime.split(' ');
+                        $("#mpOutTime").val(outT[0]);
+                        $("input[name='mpOampm'][value='" + outT[1] + "']:radio").prop('checked', 'checked');
+                    }
+                    else {
+                        html.push('<tr>');
+                        html.push('<td align="right">' + p.inTime + '</td>');
+                        html.push('<td align="center"> &nbsp;&nbsp;-&nbsp;&nbsp; </td>');
+                        html.push('<td align="right">' + p.outTime + '</td>');
+                        html.push('</tr>');
+                    }
+                });
+                html.push('</table>');
+
+                if (res.punches.length == 1) {
+                    html = ['No other punches for the day.'];
+                }
+
+                if (tardy == "") {
+                    $("#removeTardy").css("display", "none");
+                    $("#markTardy").css("display", "block");
+                } else {
+                    $("#removeTardy").css("display", "block");
+                    $("#markTardy").css("display", "none");
+                }
+
+                $('#mpExisting').html( html.join('') );
+                $("#modifyPunchModal").modal('show');
+                $("#mpInTime").focus();
+            });
+
+            return false;
+        });
+
+
+        $("#delPunch").click(function() {
+            var inID  = $("#mpInPunchID").val();
+            var outID = $("#mpOutPunchID").val();
+            window.location.href = '/employee/<%= param("empID") %>/deletePunch/' + inID + '/' + outID;
+        });
+
+        $("#markTardy").click(function() {
+            var inID = $("#mpInPunchID").val();
+            window.location.href = '/employee/<%= param("empID") %>/markTardy/' + inID;
+        });
+
+        $("#removeTardy").click(function() {
+            var tardyID = $("#mpTardyID").val();
+            if ($("select[name='mpReason']").val() == "0" && $("#mpOther").val() == "") {
+                $("#mpOther").popover('show');
+                $("#mpOther").focus();
+                return false;
+            }
+            else {
+                $("#mpOther").popover('hide');
+            }
+
+            $("#mpForm").prop("action", '/employee/<%= param("empID") %>/removeTardy/' + tardyID);
+            $("#mpForm").submit();
+            // window.location.href = '/employee/<%= param("empID") %>/removeTardy/' + tardyID;
+        });
+
+
+        //
+        //
+        //
+        var cTotals = new Highcharts.Chart({
+            chart: {
+                type: 'column',
+                height: 200,
+                renderTo: 'chartTotalsHistory',
+            },
+            title: { text: 'Hours Over The Last Year' },
+            title: { text: '' },
+            credits: { enabled: false },
+            legend: { verticalAlign: 'top' },
+            xAxis: {
+                type: 'datetime',
+                tickInterval: 30 * 86400 * 1000,
+                endOnTick: false,
+                dateTimeLabelFormats: {
+                    day: ' ',
+                    hour: '%l%P',
+                },
+                labels: {
+                    step: 2,
+                }
+            },
+            yAxis: {
+                title: { text: 'Hours' },
+                endOnTick: false,
+            },
+            plotOptions: {
+                column: {
+                    stacking: 'normal',
+                    animation: false,
+                },
+                series: {
+                    events: {
+                        click: function(e) {
+                            $.getJSON("/setperiod/timestamp/" + (e.point.x / 1000), function(res) {
+                                window.location.reload(true);
+                            });
+                        },
+                    },
+                },
+            },
+            colors: ['#D9534F', '#5BC0DE', '#F0AD4E', '#5CB85C', '#428BCA'],
+        });
+        cTotals.showLoading('Loading past history...');
+
+        $.getJSON('/chart/totalsHistory/' + <%= param("empID") %>, function(res) {
+            $.each(['regular', 'vacation', 'sick', 'holiday', 'over'].reverse(), function(num, type) {
+                cTotals.addSeries({
+                    name: ucFirst(type),
+                    data: res[type],
+                }, false);
+            });
+
+            // highlight the current period
+            cTotals.xAxis[0].addPlotBand({
+                color: '#FDFD96',
+                from: res.periodStart,
+                to: res.periodEnd
+            });
+
+            cTotals.hideLoading();
+            cTotals.redraw();
+        });
+
+
+
+        //
+        //
+        //
+        var weekPunchOptions = {
+            chart: {
+                type: 'columnrange',
+                inverted: true,
+                height: 200,                
+            },    
+            title: { text: '' },
+            legend: { enabled: false },    
+            credits: { enabled: false },
+            xAxis: {
+                categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                max: 6,
+                startOnTick: true,
+                endOnTick: true,                
+                gridLineWidth: 2,
+                labels: {
+                    step: 1,            
+                },
+                showFirstLabel: true,
+                showLastLabel: true,
+                type: 'category',
+            },
+            yAxis: {
+                type: 'datetime',
+                title: {
+                    text: ''
+                },
+                tickInterval: 3600 * 1000,
+                startOnTick: true,
+                endOnTick: true,
+                dateTimeLabelFormats: {
+                    day: ' ',
+                    hour: '%l%P',
+                },
+                labels: {
+                    step: 2,
+                },
+                showFirstLabel: true,
+                showLastLabel: true,
+            },      
+            plotOptions: {
+                columnrange: {
+                    grouping: false,
+                    animation: false,
+                },
+                series: {
+                    events: {
+                        click: function(e) {
+                            $(".punch[inID=" + this.userOptions.inID + "]").click();
+                        },
+                    },
+                },
+            },
+            tooltip: {
+                headerFormat: '{series.name}<br/>',
+                formatter: function (o) {
+                    console.log(this.series.userOptions);
+                    // add the reason if this is a modified punch                
+                    var tooltip = round( (this.point.high - this.point.low) / 1000 / 60 / 60 );
+                    tooltip += ' Hours';
+
+                    if (this.series.userOptions.reason != "") {
+                        tooltip += '<br>Reason modified: ' + this.series.userOptions.reason;
+                    }
+
+                    if (this.series.userOptions.tardy) {
+                        tooltip += '<br>Tardy';
+                    }
+
+                    return tooltip;
+                }
+            },
+        };        
+
+        weekPunchOptions.chart.renderTo = 'chartWeek1';
+        var cWeek1 = new Highcharts.Chart(weekPunchOptions);
+        cWeek1.showLoading('Loading first weeks punches...');
+
+        weekPunchOptions.chart.renderTo = 'chartWeek2';
+        var cWeek2 = new Highcharts.Chart(weekPunchOptions);
+        cWeek2.showLoading('Loading second weeks punches...');
+
+
+        $.getJSON('/chart/periodPunches/' + <%= param("empID") %>, function(res) {
+            cWeek1.yAxis.min = res.minDate * 1000;
+            cWeek1.yAxis.max = (res.minDate + 86400) * 1000;
+            $.each(res.data.week1, function(num, obj) {
+                cWeek1.addSeries(obj, false);
+            });
+            cWeek1.hideLoading();
+            cWeek1.redraw();
+
+            cWeek2.yAxis.min = res.minDate * 1000;
+            cWeek2.yAxis.max = (res.minDate + 86400) * 1000;
+            $.each(res.data.week2, function(num, obj) {
+                cWeek2.addSeries(obj, false);
+            });
+            cWeek2.hideLoading();
+            cWeek2.redraw();
+        });
+        
+
+
+        //
+        //
+        //
+        var cSummary = new Highcharts.Chart({
+            chart: {
+                renderTo: 'chartPeriodSummary',
+                height: 300,
+            },
+            title: {
+                text: ''
+            },            
+            credits: { enabled: false },
+            plotOptions: {
+                pie: {
+                    animation: false,
+                },
+            },
+        });
+        cSummary.showLoading('Loading hours summary...');
+
+        // TODO make it so these color match the other graph 
+        // take into account that some sections may be skiped
+        $.getJSON('/chart/periodSummary/' + <%= param("empID") %>, function(res) {
+            cSummary.hideLoading();
+            cSummary.addSeries(res);
+        });
+
+
+    });
+</script>
+

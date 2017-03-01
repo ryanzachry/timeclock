@@ -1,0 +1,248 @@
+% layout 'punchy';
+
+
+<div class="container">
+
+    % my $e = employeeDetails(session("employee_id"));
+    % my $time = calcEmployeeTime(session("employee_id"), $period);
+    % my $dates = datesForPeriod($period);
+
+    <div class="page-header hidden-print">    
+        <ul class="nav nav-pills pull-right hidden-print">
+            <li><a href="signout">Sign Out</a></li>
+        </ul>
+	    <h1>
+	    	<%= $e->{first_name} . " " . $e->{last_name} %>
+	    	<span class="text-muted" style="font-size:.7em;">
+	    		<%= prettyDateRange($dates->{start}, $dates->{end}) %>
+	    	</span>
+            
+            <span class="text-muted" style="font-size:.5em;">
+                <br>
+                % if ($tardies == 0) {
+                    No tardies
+                % } elsif ($tardies == 1) {
+                    1 tardy 
+                % } else {
+                    <%= $tardies %> tardies
+                % }
+            </span>
+	    </h1>
+    </div>
+
+    <div class="visible-print">
+        <h2><%= $e->{first_name} . " " . $e->{last_name} %>
+            <span class="text-muted" style="font-size:.7em;">
+                <%= prettyDateRange($dates->{start}, $dates->{end}) %>
+            </span>
+        </h2>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-xs-4">            
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th style="text-align:right;">Week 1</th>
+                        <th style="text-align:right;">Week 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Regular</td>
+                        <td style="text-align:right;"><%= prettyTime($time->{regularW1} / 60) %></td>
+                        <td style="text-align:right;"><%= prettyTime($time->{regularW2} / 60) %></td>
+                    </tr>
+                    <tr>
+                        <td>Overtime</td>
+                        <td style="text-align:right;"><%= prettyTime($time->{overW1} / 60) %></td>
+                        <td style="text-align:right;"><%= prettyTime($time->{overW2} / 60) %></td>
+                    </tr>
+                    <tr>
+                        <td>Sick</td>
+                        <td style="text-align:right;"><%= prettyTime($time->{sickW1} / 60) %></td>
+                        <td style="text-align:right;"><%= prettyTime($time->{sickW2} / 60) %></td>
+                    </tr>
+                    <tr>
+                        <td>Vacation</td>
+                        <td style="text-align:right;"><%= prettyTime($time->{vacationW1} / 60) %></td>
+                        <td style="text-align:right;"><%= prettyTime($time->{vacationW2} / 60) %></td>
+                    </tr>
+                    <tr>
+                        <td>Holiday</td>
+                        <td style="text-align:right;"><%= prettyTime($time->{holidayW1} / 60) %></td>
+                        <td style="text-align:right;"><%= prettyTime($time->{holidayW2} / 60) %></td>
+                    </tr>
+                    <tr>
+                        <td><b>Total</b></td>
+                        <td style="text-align:right;"><b><%= prettyTime($time->{totalW1} / 60) %></b></td>
+                        <td style="text-align:right;"><b><%= prettyTime($time->{totalW2} / 60) %></b></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div> <!-- /span4 -->
+        <div class="col-xs-1"></div>
+
+
+
+        <div class="col-xs-7 hidden-print">
+
+            <div class="well well-small alert-info">
+                <center><h2 id="clock" style="font-size:4em;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2></center>
+                % my $curStatus = ($e->{status} == 1) ? "in"  : "out";
+                % my $willPunch = ($e->{status} == 1) ? "Out" : "In";
+                <center>
+                    <b style="font-size:1.25em;">You are currently punched <%= $curStatus %>.</b>
+                    &nbsp;&nbsp;
+
+                    <a href="/punchy/punch?period=<%= $period %>" class="btn btn-default btn-lg btn-primary" role="button">
+	                    <span class="glyphicon glyphicon glyphicon-time"></span> 
+                    	Punch <%= $willPunch %>
+                    </a>
+                </center>
+            </div> <!-- /alert -->
+
+            <a href="/punchy/main?period=<%= $period - 1 %>" class="btn btn-primary" role="button">
+	            <span class="glyphicon glyphicon glyphicon-arrow-left"></span>
+            	Previous Period
+            </a>
+
+            % if ($period < currentPeriod()) {
+                <a href="main?period=<%= $period + 1 %>" class="btn btn-primary pull-right" id="nextPeriod" role="button">
+		            <span class="glyphicon glyphicon glyphicon-arrow-right"></span> 
+                	Next Period
+            	</a>
+            % } else {
+                <a class="btn btn-primary pull-right disabled" id="nextPeriod" role="button">
+	                <span class="glyphicon glyphicon glyphicon-arrow-right"></span> 
+                	Next Period
+            	</a>
+            % }
+
+        </div> <!-- /span7 -->
+    </div> <!-- /row -->
+
+    <br>
+
+
+    <div class="row">
+    % my @weekDays = qw/Monday Tuesday Wednesday Thursday Friday Saturday Sunday/;
+    % my $periodPunches = periodPunches($e->{employee_id}, $period, 1);
+
+    % for my $week (1..2) {
+    % my $w = "W$week";
+        <div class="col-xs-6">
+            <h3 class="hidden-print"><%= prettyDateRange($dates->{"start$w"}, $dates->{"end$w"}) %></h3>
+            <hr class="hidden-print">
+            <table class="table table-condensed">
+                <thead>
+                    <tr>
+                        <td style="min-width:50px;">&nbsp;</td>
+                        <th style="text-align:right;">Punch Time</th>
+                        <th style="text-align:right;">Day Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % my $weekTotal = 0;
+                    % my @days = ($week == 1) ? (0..6) : (7..13);
+                    % for my $dayOfPeriod (@days) {
+                        % my $dayTotal = 0;
+
+                        <th colspan="4" class="printbg" style="background-color: #eeeeee;">
+                            <%= $weekDays[ $dayOfPeriod % 7 ] %>
+                        </th>
+
+                        % if (exists($periodPunches->{$dayOfPeriod})) {
+                            % my @daysPunches = @{ $periodPunches->{$dayOfPeriod} };
+                            % for my $p (@daysPunches) {
+                            	% if (defined($p->{in}) && defined($p->{out})) {
+                                	% my $hours = ($p->{out} - $p->{in}) / 60 / 60;
+                                	% $dayTotal  += $hours;
+                                	% $weekTotal += $hours;
+                                	<tr>
+                                	    <td>
+                                	        <a href="#" class="punch" tardy="<%= $p->{tardy} %>"> 
+                                	            <%= $p->{inTime} %> - <%= $p->{outTime} %>	
+                                	        </a>	
+                                	    </td>	
+                                	    <td align="right"><%= round($hours,     2) %></td>	
+                                	    <td align="right"><%= round($dayTotal,  2) %></td>	
+                                	</tr>
+                            	% } else {
+                            		<tr>
+                            			<td><a href="#" class="punch"> <%= $p->{inTime} %> - </a></td>
+                            			<td></td>
+                            			<td></td>
+                        			</tr>
+                            	% }
+                            % }
+                        % } else {
+                            <tr><td colspan="4">&nbsp;</td></tr>
+                        % }
+                    % }
+                </tbody>
+            </table>
+        </div> <!-- /col 6 -->
+        % } # for week 
+    </div> <!-- /row -->
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    // time difference from server in seconds
+    var intvOffset, intvClock, intvCheck, offset;
+
+    $(function() {
+		$.ajaxSetup({ cache: false });
+
+        updateOffset();
+        intvOffset = setInterval('updateOffset()', 50000);
+        intvClock  = setInterval('updateClock()',   1000);
+        // intvCheck  = setInterval('networkCheck()',  5000);
+    });
+
+
+    //
+    // calculates an offset in seconds by comparing the clients js utc to the server
+    //
+    function updateOffset() {
+        // the time from the server is in utc
+        $.getJSON('/punchy/curTime.json', function(res) {
+            var curDate = new Date();
+            var tzOffset = curDate.getTimezoneOffset() * 60 * 1000;
+            // js utc timestamp in seconds (rounded)
+            var jsUTC = Math.floor(curDate.getTime() / 1000);
+            // offset in seconds
+            offset = jsUTC - res.timestamp;
+
+            updateClock();
+        });
+    }
+
+
+    //
+    //
+    //
+    function updateClock() {
+        var time = new Date();
+        time.setTime( time.getTime() - (offset * 1000) );
+
+        var h = time.getHours();
+        var m = (time.getMinutes() < 10) ? "0" + time.getMinutes() : time.getMinutes();
+
+        var ampm = (h >= 12) ? "PM" : "AM";
+        if (h > 12) h = h - 12;
+
+        var html = [];
+        html.push('');
+        html.push( [h, m].join(":") );
+        html.push('<span style="font-size:.5em;"> ' + ampm + '</span>');
+        $("#clock").html( html.join("") );
+    }
+
+
+</script>

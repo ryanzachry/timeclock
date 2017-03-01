@@ -1,0 +1,76 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Holidays
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="bs-callout bs-callout-info">
+        <p>Set the days to be counted as holidays for overtime calculations.</p>
+    </div>
+    <br>
+
+
+
+	<h3>Add a Holiday <span style="font-size:small; color:#999;">(eg: 4/1/2013)</span></h3>
+	<form method="post" action="/admin/holidays/add">
+	<div class="row">
+		<div class="col-xs-6">    	
+    		<input type="text" class="form-control" id="day" name="day" placeholder="Date...">
+    	</div>
+    	<div class="col-xs-6">
+    		<button type="submit" class="btn btn-primary">Add Holiday</button>
+    	</div>
+	</div> <!-- /row -->
+	</form>
+    <br>
+
+
+
+    <h3>Existing Holidays <span style="font-size:small; color:#999;">(Last 15)</span></h3>
+    <div class="row"><div class="col-xs-6">
+
+    <table class="table table-striped">
+    	% my $r = db->selectall_arrayref("
+        %   SELECT holiday_id, DATE_FORMAT(day, '%M %D %Y (%W)') as nice_day 
+        %   FROM holidays ORDER BY day DESC LIMIT 15
+        % ", { Slice => {} });
+
+    	% for (@$r) {
+
+    	<tr>
+    		<td>
+    			<button type="button" class="btn btn-danger btn-xs remDay" id="<%= $_->{holiday_id} %>">
+    				<span class="glyphicon glyphicon-remove"></span>
+    			</button>
+			</td>
+			<td><%= $_->{nice_day} %></td>
+		</tr>
+
+    	% }
+	</table>
+   
+   </div></div> <!-- /col /row -->
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+    	$("#day").focus();
+
+    	$(".remDay").click(function(e) {
+    		window.location.href = "/admin/holidays/remove/" + this.id;
+    	});    	
+
+    });
+</script>

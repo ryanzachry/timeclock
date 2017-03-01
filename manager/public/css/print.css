@@ -1,0 +1,34 @@
+
+body {
+    color: #000000;
+    background-color: #ff0000;    
+}
+
+.header, .nav {
+    display: none;
+}
+
+@page  {
+    margin: .5cm .5cm;
+}
+
+a[href]:after {
+    content: "";
+}
+
+.container {
+    font-size: .75em;
+    position: absolute;
+    min-height: 0;
+    width: 100%;
+
+}
+
+.wrap {
+    width: 100%;
+}
+
+.printbg {
+    background: inherit;
+    background-color: #eeeeee;
+}

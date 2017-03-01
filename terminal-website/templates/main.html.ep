@@ -1,0 +1,105 @@
+% layout 'default';
+
+<div id="wrap">
+    <div class="row">
+        <div class="col-lg-12" style="padding-top: 100px;">
+            <span id="clock" class="pull-left"></span>
+            <span id="calendar" class="pull-right"></span>
+        </div>
+    </div>
+</div> <!-- /wrap -->
+
+%= include 'badgeReader'
+
+<script type="text/javascript">
+    // time difference from server in seconds
+    var offset, day;
+    var intvOffset, intvClock, intvCheck;
+
+    $(function() {
+		$.ajaxSetup({ cache: false });
+        
+        try {
+            android.hideUIBars();
+        } catch (e) { }
+
+        // kill the timers when a badge is being read
+        $(window).keydown(function() {
+            clearInterval(intvOffset);
+            clearInterval(intvClock);
+            // clearInterval(intvCheck);
+        });
+
+        updateOffset();
+        intvOffset = setInterval('updateOffset()', 50000);
+        intvClock  = setInterval('updateClock()',   1000);
+        // intvCheck  = setInterval('networkCheck()',  5000);
+    });
+
+
+    //
+    //
+    //
+    function networkCheck() {
+        $.getJSON('ping', function(res) {
+            if (res.pong != "pong") document.location.href = "/main?_=" + (new Date()).getTime();
+        })
+        .fail(function() {
+            document.location.href = "/main?_=" + (new Date()).getTime();
+        });
+    }
+
+
+    //
+    // calculates an offset in seconds by comparing the clients js utc to the server
+    //
+    function updateOffset() {
+        // the time from the server is in utc
+        $.getJSON('curTime.json', function(res) {
+            var curDate = new Date();
+            var tzOffset = curDate.getTimezoneOffset() * 60 * 1000;
+            // js utc timestamp in seconds (rounded)
+            var jsUTC = Math.floor(curDate.getTime() / 1000);
+            // offset in seconds
+            offset = jsUTC - res.timestamp;
+
+            // console.log('server: '+ res.timestamp);
+            // console.log('jsutc: ' + jsUTC);
+            // console.log('calculated offset:' + offset);
+            // console.log('tzOffset: ' + tzOffset / 1000);
+
+            $('#calendar').Calendar();
+            updateClock();
+        });
+    }
+
+
+    //
+    //
+    //
+    function updateClock() {
+        var time = new Date();
+        time.setTime( time.getTime() - (offset * 1000) );
+
+        var h = time.getHours();
+        var m = (time.getMinutes() < 10) ? "0" + time.getMinutes() : time.getMinutes();
+
+        // TODO get a better calendar that updates properly
+        // refresh the page to update the calendar and all
+        if (0 == 1 && m == 1) {
+            document.location.href = "/main?_=" + (new Date()).getTime();
+        }
+
+        var ampm = (h >= 12) ? "PM" : "AM";
+        if (h > 12) h = h - 12;
+
+        var html = [];
+        html.push('');
+        html.push( [h, m].join(":") );
+        html.push('<span style="font-size:.5em;">' + ampm + '</span>');
+        $("#clock").html( html.join("") );
+    }
+
+
+</script>
+

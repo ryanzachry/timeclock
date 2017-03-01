@@ -1,0 +1,58 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+	    <h1>
+	    	Modified Punches for the Period
+	    	<span class="text-muted" style="font-size:.7em;"></span>
+	    </h1>
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12">
+        % for my $name (sort keys %$punches) {
+            % my $empID = $punches->{$name}->[0]->{employee_id};
+            <h3><a href="/employee/<%= $empID %>"><%= $name %></a></h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Punch</th>
+                        <th>Reason</th>
+                        <th>Modified By</th>
+                        <th>Modified On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                % for my $p (@{ $punches->{$name} }) {
+                    <tr>
+                        <td><%= $p->{tz_time} %></td>
+                        <td><%= $p->{reason} %></td>
+                        <td><%= $p->{modified_by} %></td>
+                        <td><%= $p->{modified_time} %></td>
+                    </tr>
+                % }
+                </tbody>
+            </table>
+
+            <br><br>
+
+
+        % }
+
+
+        </div>
+    </div>
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+    });
+</script>

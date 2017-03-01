@@ -1,0 +1,131 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">
+        <h1>
+            Tardies for <%= $empName %>
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="row"><div class="col-xs-6">
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Date</th>
+                <th>Reason (if added or removed)</th>
+            </tr>
+        </thead>
+        % for (@$tardies) {
+    	<tr>
+            % if ($_->{deleted} == 1) {
+                <td></td>
+        		<td><s><%= $_->{punch_time} %></s></td>
+            % } else {
+                <td>
+                    % if (session("admin") == 1) {
+                    <button type="button" class="btn btn-danger btn-xs remTardy" id="<%= $_->{tardy_id} %>">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                    % }
+                </td>
+                <td>
+                    <a href="">
+                        <%= $_->{punch_time} %>
+                    </a>
+                </td>
+            % }
+            <td><%= $_->{reason_desc} %></td>
+		</tr>
+    	% }
+	</table>
+   
+   </div></div> <!-- /col /row -->
+
+
+</div> <!-- /container -->
+
+
+
+<div class="modal" id="delModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form class="form-horizontal" method="post" action="/employee/<%= param("empID") %>/removeTardy">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Remove Tardy</h4>
+            </div> <!-- /modal-header -->
+
+            <div class="modal-body"> 
+            <input type="hidden" name="tardyID" id="tardyID">            
+                <div class="form-group">
+                    <label for="mpReason" class="col-xs-2 control-label">Reason</label>
+                    <div class="col-xs-7">
+                        <select name="mpReason" class="form-control">
+                            <option value="0">Other (Enter reason below)</option>
+                            % for (@$reasons) {                                
+                                <option value="<%= $_->{reason_id} %>"><%= $_->{description} %></option>
+                            % }
+                        </select>
+                        <br>
+                        <input type="text" class="form-control" name="mpOther" id="mpOther" placeholder="Other reason...">
+                    </div>
+                </div> <!-- /form-group -->
+
+            </div> <!-- /modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-warning" id="removeTardy">Remove Tardy</button>
+            </div> <!-- /modal-footer -->
+            </form>
+
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+</div> <!-- /modal -->
+
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+        $("#delModal").modal({ 
+            show: false,
+            backdrop: 'static',
+        });
+
+
+        $("#mpOther").popover({
+            trigger: 'manual',
+            html: true,
+            placement: 'bottom',
+            content: '<p style="color:#D9534F;"><b>Select or enter a new reason</b></p>',
+        });
+
+
+        $(".remTardy").click(function(e) {
+            // window.location.href = "/employee/<%= param("empID") %>/removeTardy/" + this.id;
+            $("#tardyID").val(this.id);
+            $("#delModal").modal('show');
+            $("#mpOther").focus();
+        });
+
+        $("#removeTardy").click(function(e) {
+            if ($("select[name='mpReason']").val() == "0" && $("#mpOther").val() == "") {
+                $("#mpOther").popover('show');
+                $("#mpOther").focus();
+                return false;
+            }
+            else {
+                $("#mpOther").popover('hide');
+            }
+        });
+
+    });
+</script>

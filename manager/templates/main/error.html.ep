@@ -1,0 +1,23 @@
+% layout 'default';
+
+<div class="container">
+    %= include 'header'
+
+	<div class="bs-callout bs-callout-danger">
+        <h1>Error!</h1>
+	    <br>
+	    % if (flash('error')) {
+	        <%= flash('error') %>
+	    % } else {
+	    	Unknown error
+	    % }
+	</div>   
+</div> <!-- /container -->
+
+
+<script type="text/javascript">
+    $(function() {
+
+    });
+</script>
+

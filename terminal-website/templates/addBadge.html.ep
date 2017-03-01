@@ -1,0 +1,94 @@
+% layout 'default';
+
+
+<div id="wrap">
+    <button type="button" class="btn btn-success btn-large banner">
+        Setup <%= $e->{first_name} . " " . $e->{last_name} %>
+    </button>
+
+    <br><br><br>
+    <p style="font-size: 3em; padding-left: 30px;">
+        Scan the badge to be assigned now.
+    </p>
+
+    % if (flash("error")) {
+    <br><br>
+    <button type="button" class="btn btn-danger btn-large" style="font-size:4em; width:100%; border-radius:0; padding:0;">
+        <%== flash("error") %>
+    </button>
+    % }
+
+</div>
+
+
+
+
+
+
+<div id="footer">
+    <div class="container">
+        <button type="button" id="cancel" class="pull-right btn btn-large btn-primary">Cancel</button>
+    </div>
+</div>
+
+
+<div style="top:200px;" id="reading" class="modal" tabindex="-1" role="dialog" aria-labelledby="Reading Badge" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h2>Reading Badge</h2>
+            </div>
+        </div>
+    </div>
+</div> 
+
+<script type="text/javascript" src="/libs/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    var iButton = "";
+
+    $(function() {
+		$.ajaxSetup({ cache: false });
+
+        $("#cancel").click(function() {
+            document.location.href = "/admin?_=" + (new Date()).getTime();
+        });
+
+        // auto sign out after 2 minutes
+        setTimeout(function() { document.location.href = "/admin/signout?_=" + (new Date()).getTime(); }, 120000);
+
+        $("#reading").modal({ show: false });
+        $(window).keydown(handleKeyDown);
+    });
+
+
+    //
+    //
+    //
+    function handleKeyDown(e) {
+        $("#reading").modal('show');
+
+        // start a timeout in case a bad read happens
+        if (iButton == "") {            
+            setTimeout(function() {
+                iButton = "";
+                $("#reading").modal('hide');
+            }, 3000);
+        }
+
+        e.preventDefault();
+
+        // The reader sends enter at the end of the serial
+        if (e.keyCode == 13) {
+            document.location.href = "/admin/setBadge/" + 
+                <%= $e->{employee_id} %> + 
+                "/" + 
+                iButton + 
+                "?_" + (new Date()).getTime();
+        }
+        else {
+            iButton += String.fromCharCode(e.keyCode);
+        }            
+    }
+
+</script>
+

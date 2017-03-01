@@ -1,0 +1,121 @@
+
+<div class="header hidden-print" style="top: 10px;">  
+    <span id="period">
+        <ul class="nav nav-pills pull-right">
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                % my $curDates = datesForPeriod( session("period") );
+                %= "Period: " . prettyDateRange( $curDates->{start}, $curDates->{end} );
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                % my $curPeriod = currentPeriod();
+                % for (reverse(($curPeriod - 10)..$curPeriod)) {
+                    % my $dates = datesForPeriod($_);
+                    <li><a href="#" id="<%= $_ %>" class="changePeriod"><%= prettyDateRange( $dates->{start}, $dates->{end} ); %></a></li>
+                % }
+                <li><a href="#" id="olderPeriod">Older</a></li>
+            </ul>
+        </li>
+        </ul>
+    </span>
+
+
+	<ul class="nav nav-pills pull-right">
+		<li><a href="/">Main</a></li>
+
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Reports <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="/report/modifiedPunches">Modified Punches</a></li>
+                <li><a href="/report/totals">Time Totals</a></li>
+                <li><a href="/report/detailed">Detailed Time &amp; Punches</a></li>
+                <li><a href="/report/fireDrill">Fire Drill List</a></li>
+                <li><a href="/report/tardies">Tardies</a></li>
+            </ul>
+        </li>
+
+        % if (session("admin") == 1) {
+		<li class="dropdown">
+			<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+				Admin Control <span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu">
+				<li><a href="/admin/employees">Employees</a></li>
+				<li><a href="/admin/accounts">Accounts</a></li>
+				<li><a href="/admin/punchReasons">Punch Reasons</a></li>
+                <li><a href="/admin/tardyReasons">Tardy Reasons</a></li>
+                <li><a href="/admin/holidays">Holidays</a></li>
+                <li><a href="/admin/upload">Upload To AS400</a></li>
+                <li><a href="/admin/download">Download Hours CSV</a></li>
+			</ul>
+		</li>
+        % }
+        
+		<li class="divider"></li>
+		<li><a href="/signout">Sign Out</a></li>
+	</ul>    
+    <h3 class="text-muted">Time Manager</h3>
+</div> <!-- /header -->
+
+
+
+<div class="modal" id="periodModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Select a Period</h4>
+            </div> <!-- /modal-header -->
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-5">                        
+                        % my $oldDate = join("-", @{ datesForPeriod( currentPeriod() - 11 )->{start}});
+                        <div class="input-append date" id="periodCal" data-date="<%= $oldDate %>" data-date-format="yyyy-mm-dd"></div>
+                    </div>
+                    <div class="col-xs-7">
+                        <div class="bs-callout bs-callout-info">
+                            Select any date within the period.
+                        </div>
+                        <br><br><br><br><br>
+                        <button type="button" id="okPeriod" class="btn btn-primary pull-right" style="margin: 15px;">OK</button>                        
+                        <button type="button" class="btn btn-default pull-right" data-dismiss="modal" style="margin: 15px;">Cancel</button>
+                    </div>
+                </div> <!-- /row -->
+            </div> <!-- /modal-body -->
+        </div> <!-- /modal-content -->
+    </div> <!-- /modal-dialog -->
+</div> <!-- /periodModal -->
+
+
+
+<script type="text/javascript">
+$(function() {
+    $.ajaxSetup({ cache: false });
+
+    $(".changePeriod").click(function() {
+        $.getJSON("/setperiod/" + $(this).attr("id"), function(res) {
+            window.location.reload(true);
+        });
+    });
+
+    $("#periodModal").modal({show: false});
+    $("#olderPeriod").click(function() {        
+        $("#periodModal").modal('show');
+        $("#periodCal").datepicker();
+        return false;
+    });
+
+    $("#okPeriod").click(function() {
+        var d = $("#periodCal").data('datepicker').getDate().getTime() / 1000;
+        $.getJSON("/setperiod/timestamp/" + d, function(res) {
+            window.location.reload(true);
+        });
+        $("#periodModal").modal('hide');
+    });
+
+
+});
+</script>

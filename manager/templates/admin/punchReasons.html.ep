@@ -1,0 +1,72 @@
+% layout 'default';
+
+<div class="container">
+
+    %= include 'header'
+
+    <div class="page-header">    
+        <h1>
+            Punch Reasons
+            <span class="text-muted" style="font-size:.7em;"></span>
+        </h1>
+    </div>
+
+    <div class="bs-callout bs-callout-info">
+        <p>Reasons listed here are available to choose from when modifying a punch.</p>
+    </div>
+    <br>
+
+
+
+	<h3>Add a Reason</h3>
+	<form method="post" action="/admin/punchReasons/add">
+	<div class="row">
+		<div class="col-xs-6">    	
+    		<input type="text" class="form-control" id="desc" name="desc" placeholder="Reason description...">
+    	</div>
+    	<div class="col-xs-6">
+    		<button type="submit" class="btn btn-primary">Add Reason</button>
+    	</div>
+	</div> <!-- /row -->
+	</form>
+    <br>
+
+
+
+    <h3>Current Reasons</h3>
+    <div class="row"><div class="col-xs-6">
+
+    <table class="table table-striped">
+    	% my $r = db->selectall_arrayref("SELECT * FROM reasons WHERE standard = 1 AND type = 'P'", { Slice => {} });
+    	% for (@$r) {
+
+    	<tr>
+    		<td>
+    			<button type="button" class="btn btn-danger btn-xs remReason" id="<%= $_->{reason_id} %>">
+    				<span class="glyphicon glyphicon-remove"></span>
+    			</button>
+			</td>
+			<td><%= $_->{description} %></td>
+		</tr>
+
+    	% }
+	</table>
+   
+   </div></div> <!-- /col /row -->
+
+
+</div> <!-- /container -->
+
+
+
+<script type="text/javascript">
+    $(function() {
+
+    	$("#desc").focus();
+
+    	$(".remReason").click(function(e) {
+    		window.location.href = "/admin/punchReasons/remove/" + this.id;
+    	});    	
+
+    });
+</script>
