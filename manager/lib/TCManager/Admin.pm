@@ -86,7 +86,7 @@ sub sendToAS400 {
 
 	my ($fh, $localFile) = tempfile(UNLINK => 0);
 	print $fh "$_\n" for (@out);
-	close($fh)
+	close($fh);
 
 	my $ftp = Net::FTP->new($s->conf->{iseries_host});
 	$ftp->login($s->conf->{iseries_user}, $s->conf->{iseries_pass});

@@ -13,10 +13,10 @@ sub startup {
     my $s = shift;
 
     my $conf = $s->plugin('Config', {
-        file      => 'tcmanager.conf',
+        file      => '/timeclock/manager/tcmanager.conf',
         stash_key => 'conf'
     });
-    $s->helper(conf => sub { return $conf; })
+    $s->helper(conf => sub { return $conf; });
 
     $s->helper(db => sub {
         return DBI->connect_cached(
@@ -47,7 +47,7 @@ sub startup {
     $r->route('/printFireDrill')->to('main#printFireDrill');
     $r->route('/punchy/signin')->via('get') ->to('punchy#signin');
     $r->route('/punchy/signin')->via('post')->to('punchy#authenticate');
-    my $punchy_user = $r->bridge('/punchy')->to('punchy#is_authenticated');
+    my $punchy_user = $r->under('/punchy')->to('punchy#is_authenticated');
     $punchy_user->route('/')->to('punchy#slash');
     $punchy_user->route('/main')->to('punchy#main');
     $punchy_user->route('/curTime.json')->to('punchy#curTime');
@@ -55,7 +55,7 @@ sub startup {
     $punchy_user->route('/signout')->to('punchy#signout');    
 
     # only authenticated user will have access to these routes
-    my $users_only = $r->bridge('/')->to('auth#is_authenticated');
+    my $users_only = $r->under('/')->to('auth#is_authenticated');
     $users_only->route('/signout')->to('auth#signout');
     $users_only->route('/')->to('main#slash');
     $users_only->route('/main')->to('main#main');
@@ -87,7 +87,7 @@ sub startup {
     $users_only->route('/report/detailed')->to('report#detailed');
     $users_only->route('/report/tardies')->to('report#tardies');
 
-    my $admins_only = $r->bridge('/')->to('auth#is_admin');
+    my $admins_only = $r->under('/')->to('auth#is_admin');
     $admins_only->route('/admin/upload')->via('get')->to('admin#upload');
     $admins_only->route('/admin/upload')->via('post')->to('admin#sendToAS400');
     $admins_only->route('/admin/download')->via('get')->to('admin#download');
