@@ -6,6 +6,7 @@ There are a couple parts to this system, manager, Android and web clients. Some 
 * Automatic flagging of tardies along with tracking
 * Various reports for time and changes made
 * Easy export / upload to external payroll, iSeries or Zuman.
+* Multiple locations and time zones for grouping employees
 
 - - -
 
