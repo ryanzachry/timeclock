@@ -7,7 +7,7 @@ There are a couple parts to this system, manager, Android and web clients. Some 
 * Various reports for time and changes made
 * Easy export / upload to external payroll, iSeries or Zuman.
 
-
+- - -
 
 ## Manager
 This is for managers and administrators to manage accounts, modify hours and get reports for time. Employee details:
@@ -17,12 +17,13 @@ Quick view of all employees:
 <img src="docs/manager-emp_all.png">
 
 
+- - -
 
 ## Web Client
 Employees can see current and past hours while punching in or out.
 <img src="docs/employee-review.png">
 
-
+- - -
 
 ## Android Terminal
 A cheap Android tablet can be used along with a USB iButton reader so employees can punch in / out.
